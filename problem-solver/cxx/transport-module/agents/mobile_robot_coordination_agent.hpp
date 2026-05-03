@@ -2,9 +2,9 @@
 
 #include <sc-memory/sc_agent.hpp>
 
-using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstMembershipArc>;
-// Реагируем на появление новой дуги принадлежности в узел мобильного робота
-// Подробнее тут https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/events
+#include "keynodes/keynodes.hpp"
+
+using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstPosArc>;
 
 class MobileRobotCoordinationAgent : public ScAgent<ScEventChangeMobileRobotState>
 {
@@ -13,7 +13,14 @@ public:
 
   bool CheckInitiationCondition(ScEventChangeMobileRobotState const & event) override;
 
+  ScResult InterpreterStateReadyBeingLoaded(ScAction & action, ScAddr const & robotAddr);
+
+  ScResult InterpreterStateReadyBeingUnloaded(ScAction & action, ScAddr const & robotAddr);
+
   ScResult DoProgram(
       ScEventChangeMobileRobotState const & event,
       ScAction & action) override;
+  
+private:
+  InterpreterCallback m_interpreterCallback;
 };

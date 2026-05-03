@@ -1,0 +1,12 @@
+// роботы
+robot1
+<~ concept_stopped;
+<|~ concept_box_loaded;;
+
+robot2
+<~ concept_stopped;
+<|~ concept_box_loaded;;
+
+robot3
+<~ concept_stopped;
+<|~ concept_box_loaded;;

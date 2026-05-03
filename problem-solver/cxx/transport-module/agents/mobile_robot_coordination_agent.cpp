@@ -1,35 +1,53 @@
 #include "mobile_robot_coordination_agent.hpp"
 
-#include "keynodes/keynodes.hpp"
-
 ScAddr MobileRobotCoordinationAgent::GetActionClass() const
 {
-  return Keynodes::action_coordinate_mobile_robot;
+  return MobileRobotsKeynodes::action_coordinate_mobile_robot;
 }
 
 bool MobileRobotCoordinationAgent::CheckInitiationCondition(ScEventChangeMobileRobotState const & event)
 {
-  // Тут надо задать шаблоны и проверять по ним наличие в базе знаний ситуаций, соответствующих командам 
-  // агента интерпретации состояний мобильного робота, для дальнейшего вызова DoProgram
+  ScAddr const & stateAddr = event.GetArcSourceElement();
+  ScAddrToValueUnorderedMap<InterpreterCallback> states = {
+      {MobileRobotsKeynodes::concept_ready_being_launched,
+       [this](ScAction & action, ScAddr const & robotAddr) -> ScResult
+       {
+         return InterpreterStateReadyBeingLoaded(action, robotAddr);
+       }},
+      {MobileRobotsKeynodes::concept_ready_being_unlaunched,
+       [this](ScAction & action, ScAddr const & robotAddr) -> ScResult
+       {
+         return InterpreterStateReadyBeingUnloaded(action, robotAddr);
+       }},
+  };
+  auto const & it = states.find(stateAddr);
+  if (it == states.cend())
+    return false;
 
-  // Подробнее тут https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/agents/#checkinitiationcondition
-
+  m_interpreterCallback = it->second;
   return true;
 }
 
-ScResult MobileRobotCoordinationAgent::DoProgram(
-    ScEventChangeMobileRobotState const & event,
-    ScAction & action)
+ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction & action, ScAddr const & robotAddr)
+{
+  // Установить для робота состояние "загружается"
+  // Найти местоположение робота и из этого местоположения взять свободную коробку и установить через какой-то
+  // промежуток времени её в качестве груза робота
+  // После этого убрать состояние "загружается" и установить состояние "загружен"
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScAction & action, ScAddr const & robotAddr)
+{
+  // Установить для робота состояние "разгружается"
+  // Найти местоположение робота и из этого местоположения взять свободную коробку и установить через какой-то
+  // промежуток времени её в качестве груза робота
+  // После этого убрать состояние "разгружается" и установить состояние "разгружен"
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotCoordinationAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
 {
   ScAddr const & robotAddr = event.GetArcTargetElement();
-
-  // Тут должна быть логика обработки команд от агента интерпретации состояния мобильного робота
-
-  // Для создания и ожидания ситуации в базе знаний необходимо использовать это API 
-  // https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/waiters/#examples-of-using-waiters
-
-  // Для вызова агента дампа статистики необходимо использовать это API 
-  // https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/actions/
-
-  return action.FinishSuccessfully();
+  return m_interpreterCallback(action, robotAddr);
 }

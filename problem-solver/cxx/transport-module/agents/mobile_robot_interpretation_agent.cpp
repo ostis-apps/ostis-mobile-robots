@@ -1,32 +1,51 @@
 #include "mobile_robot_interpretation_agent.hpp"
 
-#include "keynodes/keynodes.hpp"
-
 ScAddr MobileRobotInterpretationAgent::GetActionClass() const
 {
-  return Keynodes::action_interpreter_mobile_robot;
+  return MobileRobotsKeynodes::action_interpreter_mobile_robot;
 }
 
 bool MobileRobotInterpretationAgent::CheckInitiationCondition(ScEventChangeMobileRobotState const & event)
 {
-  // Тут надо задать шаблоны и проверять по ним наличие в базе знаний ситуаций, соответствующих командам 
-  // агента координации мобильного робота, для дальнейшего вызова DoProgram
+  ScAddr const & stateAddr = event.GetArcSourceElement();
+  ScAddrToValueUnorderedMap<InterpreterCallback> states = {
+    {MobileRobotsKeynodes::concept_launched, [this](ScAction & action, ScAddr const & robotAddr) -> ScResult { return InterpreterStateLaunched(action, robotAddr); }},
+    {MobileRobotsKeynodes::concept_box_loaded, [this](ScAction & action, ScAddr const & robotAddr) -> ScResult { return InterpreterStateBoxLoaded(action, robotAddr); }},
+    {MobileRobotsKeynodes::concept_box_unloaded, [this](ScAction & action, ScAddr const & robotAddr) -> ScResult { return InterpreterStateBoxUnloaded(action, robotAddr); }},
+    {MobileRobotsKeynodes::concept_stopped, [this](ScAction & action, ScAddr const & robotAddr) -> ScResult { return InterpreterStateStopped(action, robotAddr); }},
+  };
+  auto const & it = states.find(stateAddr);
+  if (it == states.cend())
+    return false;
 
-  // Подробнее тут https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/agents/#checkinitiationcondition
-
+  m_interpreterCallback = it->second;
   return true;
 }
 
-ScResult MobileRobotInterpretationAgent::DoProgram(
-    ScEventChangeMobileRobotState const & event,
-    ScAction & action)
+ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & action, ScAddr const & robotAddr)
+{
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & action, ScAddr const & robotAddr)
+{
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & action, ScAddr const & robotAddr)
+{
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotInterpretationAgent::InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr)
+{
+  m_logger.Info("stopped");
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotInterpretationAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
 {
   ScAddr const & robotAddr = event.GetArcTargetElement();
-
-  // Тут должна быть логика обработки команд от агента координатора
-
-  // Для создания и ожидания ситуации в базе знаний необходимо использовать это API 
-  // https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/waiters/#examples-of-using-waiters
-
-  return action.FinishSuccessfully();
+  m_logger.Info("Test call");
+  return m_interpreterCallback(action, robotAddr);
 }

@@ -1,4 +1,5 @@
 {
+    "terminal.integrated.automationShell.linux": "bash",
     "cmake.ctest.testExplorerIntegrationEnabled": false,
     // Debug configuration for TestMate
     "testMate.cpp.debug.configTemplate": {
@@ -14,7 +15,7 @@
         "program": "${exec}",
         "args": "${argsArray}",
         "cwd": "${cwd}",
-        "env": "${envObj}",
+        "env": "${envObj}", 
         "environment": "${envObjArray}",
         "sourceFileMap": "${sourceFileMapObj}",
         "testMate.cpp.debug.setEnv": {
@@ -95,5 +96,7 @@
         "forward_list": "cpp",
         "list": "cpp",
         "any": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/home/artem/ostis-example-app/ostis-mobile-robots",
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
 }

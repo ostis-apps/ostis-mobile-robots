@@ -2,6 +2,9 @@
 
 #include "agents/mobile_robot_coordination_agent.hpp"
 #include "agents/mobile_robot_interpretation_agent.hpp"
+
+#include "keynodes/keynodes.hpp"
+
 // Тут надо будет добавить заголовочные файлы для агента генерации случайных препятствий и агента дампа статистики
 
 SC_MODULE_REGISTER(TransportModule);
@@ -12,15 +15,31 @@ SC_MODULE_REGISTER(TransportModule);
 void TransportModule::Initialize(ScMemoryContext * _)
 {
   ScAgentContext context;
-  // Тут надо пройтись по всем мобильным роботам в базе знаний и для них зарегистрировать агент координации и агент интерпретации
-
-  // Подробнее тут https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/modules/
+  ScIterator3Ptr const it3 = context.CreateIterator3(
+    MobileRobotsKeynodes::concept_mobile_robot,
+    ScType::ConstPermPosArc,
+    ScType::ConstNode
+  );
+  while (it3->Next())
+  {
+    ScAddr const & robotAddr = it3->Get(2);
+    context.SubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
+    context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
+  }
 }
 
 void TransportModule::Shutdown(ScMemoryContext * _)
-{
+{  
   ScAgentContext context;
-  // Тут надо пройтись по всем мобильным роботам в базе знаний и для них дерегистрировать агент координации и агент интерпретации
-
-  // Подробнее тут https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/modules/
+  ScIterator3Ptr const it3 = context.CreateIterator3(
+    MobileRobotsKeynodes::concept_mobile_robot,
+    ScType::ConstPermPosArc,
+    ScType::ConstNode
+  );
+  while (it3->Next())
+  {
+    ScAddr const & robotAddr = it3->Get(2);
+    context.UnsubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
+    context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
+  }
 }

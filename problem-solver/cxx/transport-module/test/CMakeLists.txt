@@ -7,6 +7,7 @@ add_executable(transport-module-tests ${SOURCES})
 target_link_libraries(transport-module-tests
     LINK_PRIVATE GTest::gtest_main
     LINK_PRIVATE transport-module
+    LINK_PRIVATE sc-machine::sc-builder-lib
 )
 target_include_directories(transport-module-tests
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/units
