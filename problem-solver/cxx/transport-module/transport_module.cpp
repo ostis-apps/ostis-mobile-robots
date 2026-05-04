@@ -2,12 +2,14 @@
 
 #include "agents/mobile_robot_coordination_agent.hpp"
 #include "agents/mobile_robot_interpretation_agent.hpp"
+#include "agents/mobile_robot_analyzer_agent.hpp"
 
 #include "keynodes/keynodes.hpp"
 
 // Тут надо будет добавить заголовочные файлы для агента генерации случайных препятствий и агента дампа статистики
 
-SC_MODULE_REGISTER(TransportModule);
+SC_MODULE_REGISTER(TransportModule)
+  ->Agent<MobileRobotAnalyzerAgent>();
 // Тут надо зарегистрировать агент генерации случайных препятствий и агент дампа статистики
 // ->Agent<MyAgent>();
 // Подробнее тут https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/modules/
@@ -25,6 +27,7 @@ void TransportModule::Initialize(ScMemoryContext * _)
     ScAddr const & robotAddr = it3->Get(2);
     context.SubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
+    context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
 }
 
@@ -41,5 +44,6 @@ void TransportModule::Shutdown(ScMemoryContext * _)
     ScAddr const & robotAddr = it3->Get(2);
     context.UnsubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
+    context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
 }
