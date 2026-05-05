@@ -13,18 +13,6 @@ concept_simulation_time_tick
 concept_obstacle
 <- sc_node_class;;
 
-concept_obstacle_appearance_event
-<- sc_node_class;;
-
-concept_obstacle_disappearance_event
-<- sc_node_class;;
-
-nrel_generated_obstacle
-<- sc_node_norole_relation;;
-
-nrel_event_time
-<- sc_node_norole_relation;;
-
 nrel_obstacle_position
 <- sc_node_norole_relation;;
 
@@ -40,6 +28,12 @@ nrel_min_obstacle_interval
 nrel_max_obstacle_interval
 <- sc_node_norole_relation;;
 
+nrel_min_obstacle_lifetime
+<- sc_node_norole_relation;;
+
+nrel_max_obstacle_lifetime
+<- sc_node_norole_relation;;
+
 obstacle_generation_parameters
 <- concept_modeling_parameter;
 <- concept_obstacle_generation_parameters;;
@@ -47,7 +41,11 @@ obstacle_generation_parameters
 nrel_obstacle_intensity ~> (obstacle_generation_parameters => obstacle_probability_02);;
 nrel_min_obstacle_interval ~> (obstacle_generation_parameters => obstacle_min_interval_3);;
 nrel_max_obstacle_interval ~> (obstacle_generation_parameters => obstacle_max_interval_8);;
+nrel_min_obstacle_lifetime ~> (obstacle_generation_parameters => obstacle_min_lifetime_2);;
+nrel_max_obstacle_lifetime ~> (obstacle_generation_parameters => obstacle_max_lifetime_5);;
 
 obstacle_probability_02 = [0.2];;
 obstacle_min_interval_3 = [3];;
 obstacle_max_interval_8 = [8];;
+obstacle_min_lifetime_2 = [2];;
+obstacle_max_lifetime_5 = [5];;
