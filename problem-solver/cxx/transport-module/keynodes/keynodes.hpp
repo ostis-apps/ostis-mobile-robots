@@ -27,9 +27,6 @@ public:
   
   static inline ScKeynode const nrel_location{"nrel_location", ScType::ConstNodeNonRole};
 
-  static inline ScKeynode const concept_simulation_time_tick{"concept_simulation_time_tick", ScType::ConstNodeClass};
-  static inline ScKeynode const concept_obstacle{"concept_obstacle", ScType::ConstNodeClass};
-
   static inline ScKeynode const nrel_total_simulation_time{"nrel_total_simulation_time", ScType::ConstNodeNonRole};
   static inline ScKeynode const nrel_total_load_unload_time{"nrel_total_load_unload_time", ScType::ConstNodeNonRole};
   static inline ScKeynode const nrel_total_obstacle_wait_time{"nrel_total_obstacle_wait_time", ScType::ConstNodeNonRole};
