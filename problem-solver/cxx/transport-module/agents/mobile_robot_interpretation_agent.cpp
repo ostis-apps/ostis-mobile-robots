@@ -72,6 +72,7 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateStopped(ScAction & acti
 
 ScResult MobileRobotInterpretationAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
 {
+  // нужно ли чтото дополнять в этом методе? 
   ScAddr const & robotAddr = event.GetArcTargetElement();
   m_logger.Info("Test call");
   return m_interpreterCallback(action, robotAddr);
