@@ -1,10 +1,14 @@
 .idea
+.vscode
 
 bin/
 build/
 install/
 *.bin
 repo
+CMakeFiles
+CMakeCache.txt
+DartConfiguration.tcl
 
 .cache/
 *.db

@@ -1,4 +1,5 @@
 // роботы
+// я бы добавил состояние <|~ concept_launched
 robot1
 <~ concept_stopped;
 <|~ concept_box_loaded;;

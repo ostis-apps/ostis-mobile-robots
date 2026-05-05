@@ -13,13 +13,21 @@ public:
 
   static inline ScKeynode const concept_launched{"concept_launched", ScType::ConstNodeClass};
   static inline ScKeynode const concept_stopped{"concept_stopped", ScType::ConstNodeClass};
+
+  static inline ScKeynode const concept_robot_is_loading{"concept_robot_is_loading", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_robot_is_unloading{"concept_robot_is_unloading", ScType::ConstNodeClass};
+
+  // что то из этого можно убрать, так как это противоположные факты
   static inline ScKeynode const concept_box_loaded{"concept_box_loaded", ScType::ConstNodeClass};
   static inline ScKeynode const concept_box_unloaded{"concept_box_unloaded", ScType::ConstNodeClass};
-  static inline ScKeynode const concept_ready_being_launched{"concept_ready_being_launched", ScType::ConstNodeClass};
-  static inline ScKeynode const concept_ready_being_unlaunched{"concept_ready_being_unlaunched", ScType::ConstNodeClass};
+
+  static inline ScKeynode const concept_ready_being_loaded{"concept_ready_being_loaded", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_ready_being_unloaded{"concept_ready_being_unloaded", ScType::ConstNodeClass};
 
   static inline ScKeynode const concept_loading_process{"concept_loading_process", ScType::ConstNodeClass};
   static inline ScKeynode const concept_unloading_process{"concept_unloading_process", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_waiting_obstacle{"concept_waiting_obstacle", ScType::ConstNodeClass};
+  
   static inline ScKeynode const concept_waiting_obstacle{"concept_waiting_obstacle", ScType::ConstNodeClass};
   
   static inline ScKeynode const concept_mobile_robot{"concept_mobile_robot", ScType::ConstNodeClass};
@@ -46,6 +54,9 @@ public:
   static inline ScKeynode const nrel_max_obstacle_lifetime{"nrel_max_obstacle_lifetime", ScType::ConstNodeNonRole};
 
   static inline ScKeynode const obstacle_generation_parameters{"obstacle_generation_parameters", ScType::ConstNode};
+
+  static inline ScKeynode const rrel_start_point{"rrel_start_point", ScType::ConstNodeRole};
+  static inline ScKeynode const rrel_end_point{"rrel_end_point", ScType::ConstNodeRole};
 
   static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeClass};
   static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};

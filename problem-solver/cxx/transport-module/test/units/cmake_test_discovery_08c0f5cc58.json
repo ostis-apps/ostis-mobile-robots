@@ -1,0 +1,17 @@
+{
+  "tests": 1,
+  "name": "AllTests",
+  "testsuites": [
+    {
+      "name": "TransportModuleTest",
+      "tests": 1,
+      "testsuite": [
+        {
+          "name": "CallMobileRobotCoordinationAgent",
+          "file": "\/home\/artem\/ostis-mobile-robots\/problem-solver\/cxx\/transport-module\/test\/units\/test_mobile_robot_coordination_agent.cpp",
+          "line": 41
+        }
+      ]
+    }
+  ]
+}
