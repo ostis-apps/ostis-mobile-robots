@@ -22,6 +22,5 @@ private:
   std::map<size_t, std::chrono::steady_clock::time_point> m_startTimes;
   std::map<size_t, ScAddr> m_lastStates;
   
-  // Добавляем контекст памяти
   ScMemoryContext* m_memoryCtx;
 };
