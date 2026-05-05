@@ -3,6 +3,8 @@
 #include "agents/mobile_robot_coordination_agent.hpp"
 #include "agents/mobile_robot_interpretation_agent.hpp"
 #include "agents/mobile_robot_analyzer_agent.hpp"
+#include "agents/random_obstacle_generation_agent.hpp"
+
 
 #include "keynodes/keynodes.hpp"
 
@@ -29,6 +31,7 @@ void TransportModule::Initialize(ScMemoryContext * _)
     context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
     context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
+  context.SubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
 }
 
 void TransportModule::Shutdown(ScMemoryContext * _)
@@ -46,4 +49,5 @@ void TransportModule::Shutdown(ScMemoryContext * _)
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
     context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
+  context.SubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
 }
