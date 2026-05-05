@@ -24,7 +24,7 @@ bool MobileRobotInterpretationAgent::CheckInitiationCondition(ScEventChangeMobil
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & action, ScAddr const & robotAddr)
 {
-  //добавление состояния "перемещается"
+  //добавление состояния "перемещается" 
   //добавление скорости
   //изменение местоположения на точку, принадлежащую пути
   //перемещение в точку загрузки
@@ -75,4 +75,5 @@ ScResult MobileRobotInterpretationAgent::DoProgram(ScEventChangeMobileRobotState
   ScAddr const & robotAddr = event.GetArcTargetElement();
   m_logger.Info("Test call");
   return m_interpreterCallback(action, robotAddr);
+  //прорбный комик
 }
