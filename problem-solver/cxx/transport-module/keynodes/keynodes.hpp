@@ -29,10 +29,6 @@ public:
 
   static inline ScKeynode const concept_simulation_time_tick{"concept_simulation_time_tick", ScType::ConstNodeClass};
   static inline ScKeynode const concept_obstacle{"concept_obstacle", ScType::ConstNodeClass};
-  static inline ScKeynode const concept_obstacle_appearance_event{"concept_obstacle_appearance_event",ScType::ConstNodeClass};
-
-  static inline ScKeynode const nrel_generated_obstacle{"nrel_generated_obstacle",ScType::ConstNodeNonRole};
-  static inline ScKeynode const nrel_event_time{ "nrel_event_time", ScType::ConstNodeNonRole };
 
   static inline ScKeynode const nrel_total_simulation_time{"nrel_total_simulation_time", ScType::ConstNodeNonRole};
   static inline ScKeynode const nrel_total_load_unload_time{"nrel_total_load_unload_time", ScType::ConstNodeNonRole};
@@ -40,20 +36,22 @@ public:
 
   static inline ScKeynode const action_generate_random_obstacle{"action_generate_random_obstacle", ScType::ConstNodeClass};
 
-static inline ScKeynode const concept_obstacle_disappearance_event{"concept_obstacle_disappearance_event", ScType::ConstNodeClass};
-static inline ScKeynode const concept_obstacle_generation_parameters{"concept_obstacle_generation_parameters", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_simulation_time_tick{"concept_simulation_time_tick", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_obstacle{"concept_obstacle", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_obstacle_generation_parameters{"concept_obstacle_generation_parameters", ScType::ConstNodeClass};
 
-static inline ScKeynode const nrel_obstacle_position{"nrel_obstacle_position", ScType::ConstNodeNonRole};
-static inline ScKeynode const nrel_obstacle_lifetime{"nrel_obstacle_lifetime", ScType::ConstNodeNonRole};
-static inline ScKeynode const nrel_obstacle_intensity{"nrel_obstacle_intensity", ScType::ConstNodeNonRole};
-static inline ScKeynode const nrel_min_obstacle_interval{"nrel_min_obstacle_interval", ScType::ConstNodeNonRole};
-static inline ScKeynode const nrel_max_obstacle_interval{"nrel_max_obstacle_interval", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_obstacle_position{"nrel_obstacle_position", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_obstacle_lifetime{"nrel_obstacle_lifetime", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_obstacle_intensity{"nrel_obstacle_intensity", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_min_obstacle_interval{"nrel_min_obstacle_interval", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_max_obstacle_interval{"nrel_max_obstacle_interval", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_min_obstacle_lifetime{"nrel_min_obstacle_lifetime", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_max_obstacle_lifetime{"nrel_max_obstacle_lifetime", ScType::ConstNodeNonRole};
 
-static inline ScKeynode const obstacle_generation_parameters{"obstacle_generation_parameters", ScType::ConstNode};
+  static inline ScKeynode const obstacle_generation_parameters{"obstacle_generation_parameters", ScType::ConstNode};
 
-static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeClass};
-static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};
-
+  static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeClass};
+  static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};
 };
 
 // Подробнее о ключевых элементах тут: https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/keynodes/
