@@ -49,5 +49,6 @@ void TransportModule::Shutdown(ScMemoryContext * _)
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
     context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
-  context.SubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
+  context.UnsubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
+  
 }
