@@ -14,13 +14,15 @@ ScResult RandomObstacleGenerationAgent::DoProgram(
     ScEventGenerateSimulationTimeTick const & event,
     ScAction & action)
 {
-  ScAddr const & tickAddr = event.GetArcTargetElement();
+  ++m_currentTick;
+  RemoveExpiredObstacles();
 
   if (!ShouldGenerateObstacle())
     return action.FinishSuccessfully();
 
-  ScAddr const & eventAddr = GenerateObstacleAppearanceEvent(tickAddr);
-  action.FormResult(eventAddr);
+  ScAddr const obstacleAddr = GenerateObstacle();
+  if (obstacleAddr.IsValid())
+    action.FormResult(obstacleAddr);
 
   return action.FinishSuccessfully();
 }
@@ -32,74 +34,66 @@ bool RandomObstacleGenerationAgent::ShouldGenerateObstacle()
   if (m_ticksSinceLastObstacle < m_nextObstacleInterval)
     return false;
 
-  std::uniform_real_distribution<double> probabilityDistribution(0.0, 1.0);
-  if (probabilityDistribution(m_randomGenerator) >= ObstacleProbability)
-    return false;
-
   m_ticksSinceLastObstacle = 0;
   m_nextObstacleInterval = GenerateNextObstacleInterval();
 
-  return true;
+  std::uniform_real_distribution<double> probabilityDistribution(0.0, 1.0);
+  return probabilityDistribution(m_randomGenerator) < ObstacleProbability;
 }
 
-ScAddr RandomObstacleGenerationAgent::GenerateObstacleAppearanceEvent(ScAddr const & tickAddr)
+void RandomObstacleGenerationAgent::RemoveExpiredObstacles()
 {
-  ScAddr const & obstacleAddr = GenerateObstacle(tickAddr);
-  ScAddr const & eventAddr = m_context.GenerateNode(ScType::ConstNode);
+  for (auto it = m_obstacleExpirationTicks.begin(); it != m_obstacleExpirationTicks.end();)
+  {
+    if (it->second > m_currentTick)
+    {
+      ++it;
+      continue;
+    }
 
-  m_context.GenerateConnector(
-      ScType::ConstPermPosArc,
-      MobileRobotsKeynodes::concept_obstacle_appearance_event,
-      eventAddr);
-
-  ScAddr const & generatedObstacleArc = m_context.GenerateConnector(
-      ScType::ConstCommonArc,
-      eventAddr,
-      obstacleAddr);
-  m_context.GenerateConnector(
-      ScType::ConstPermPosArc,
-      MobileRobotsKeynodes::nrel_generated_obstacle,
-      generatedObstacleArc);
-
-  ScAddr const & eventTimeArc = m_context.GenerateConnector(
-      ScType::ConstCommonArc,
-      eventAddr,
-      tickAddr);
-  m_context.GenerateConnector(
-      ScType::ConstPermPosArc,
-      MobileRobotsKeynodes::nrel_event_time,
-      eventTimeArc);
-
-  return eventAddr;
+    ScAddr const obstacleAddr = it->first;
+    it = m_obstacleExpirationTicks.erase(it);
+    RemoveObstacle(obstacleAddr);
+  }
 }
 
-ScAddr RandomObstacleGenerationAgent::GenerateObstacle(ScAddr const & tickAddr)
+void RandomObstacleGenerationAgent::RemoveObstacle(ScAddr const & obstacleAddr)
 {
-  ScAddr const & obstacleAddr = m_context.GenerateNode(ScType::ConstNode);
+  if (obstacleAddr.IsValid() && m_context.IsElement(obstacleAddr))
+    m_context.EraseElement(obstacleAddr);
+}
+
+ScAddr RandomObstacleGenerationAgent::GenerateObstacle()
+{
+  ScAddr const obstaclePositionAddr = SelectObstaclePosition();
+  if (!obstaclePositionAddr.IsValid())
+    return ScAddr::Empty;
+
+  ScAddr const obstacleAddr = m_context.GenerateNode(ScType::ConstNode);
 
   m_context.GenerateConnector(
       ScType::ConstPermPosArc,
       MobileRobotsKeynodes::concept_obstacle,
       obstacleAddr);
 
-  ScAddr const & obstaclePositionAddr = SelectObstaclePosition();
-  if (obstaclePositionAddr.IsValid())
-  {
-    ScAddr const & obstaclePositionArc = m_context.GenerateConnector(
-        ScType::ConstCommonArc,
-        obstacleAddr,
-        obstaclePositionAddr);
-    m_context.GenerateConnector(
-        ScType::ConstPermPosArc,
-        MobileRobotsKeynodes::nrel_obstacle_position,
-        obstaclePositionArc);
-  }
+  ScAddr const obstaclePositionArc = m_context.GenerateConnector(
+      ScType::ConstCommonArc,
+      obstacleAddr,
+      obstaclePositionAddr);
+  m_context.GenerateConnector(
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_obstacle_position,
+      obstaclePositionArc);
+
+  int const obstacleLifetime = GenerateObstacleLifetime();
+  m_obstacleExpirationTicks.emplace(obstacleAddr, m_currentTick + obstacleLifetime);
 
   return obstacleAddr;
 }
 
 ScAddr RandomObstacleGenerationAgent::SelectObstaclePosition()
 {
+  ScAddrVector routeArcs;
   ScIterator5Ptr const it5 = m_context.CreateIterator5(
       ScType::ConstNode,
       ScType::ConstCommonArc,
@@ -107,14 +101,24 @@ ScAddr RandomObstacleGenerationAgent::SelectObstaclePosition()
       ScType::ConstPermPosArc,
       MobileRobotsKeynodes::nrel_next_point);
 
-  if (it5->Next())
-    return it5->Get(0);
+  while (it5->Next())
+    routeArcs.push_back(it5->Get(1));
 
-  return ScAddr::Empty;
+  if (routeArcs.empty())
+    return ScAddr::Empty;
+
+  std::uniform_int_distribution<size_t> positionDistribution(0, routeArcs.size() - 1);
+  return routeArcs[positionDistribution(m_randomGenerator)];
 }
 
 int RandomObstacleGenerationAgent::GenerateNextObstacleInterval()
 {
   std::uniform_int_distribution<int> intervalDistribution(MinObstacleInterval, MaxObstacleInterval);
   return intervalDistribution(m_randomGenerator);
+}
+
+int RandomObstacleGenerationAgent::GenerateObstacleLifetime()
+{
+  std::uniform_int_distribution<int> lifetimeDistribution(MinObstacleLifetime, MaxObstacleLifetime);
+  return lifetimeDistribution(m_randomGenerator);
 }
