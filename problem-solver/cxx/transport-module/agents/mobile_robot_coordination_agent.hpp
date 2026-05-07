@@ -4,7 +4,7 @@
 
 #include "keynodes/keynodes.hpp"
 
-using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstPosArc>;
+using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstMembershipArc>;
 
 class MobileRobotCoordinationAgent : public ScAgent<ScEventChangeMobileRobotState>
 {
@@ -23,4 +23,8 @@ public:
   
 private:
   InterpreterCallback m_interpreterCallback;
+
+  void ChangeActualTempArcToNeg(const ScAddr &addr1, const ScAddr &addr2);
+  void ChangeActualTempArcToPos(const ScAddr &addr1, const ScAddr &addr2);
+
 };

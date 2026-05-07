@@ -7,7 +7,7 @@
 
 #include "keynodes/keynodes.hpp"
 
-using ScEventGenerateSimulationTimeTick = ScEventAfterGenerateOutgoingArc<ScType::ConstPosArc>;
+using ScEventGenerateSimulationTimeTick = ScEventAfterGenerateOutgoingArc<ScType::ConstMembershipArc>;
 
 class RandomObstacleGenerationAgent : public ScAgent<ScEventGenerateSimulationTimeTick>
 {

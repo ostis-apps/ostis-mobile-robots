@@ -58,8 +58,10 @@ public:
   static inline ScKeynode const rrel_start_point{"rrel_start_point", ScType::ConstNodeRole};
   static inline ScKeynode const rrel_end_point{"rrel_end_point", ScType::ConstNodeRole};
 
-  static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeStructure};
   static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};
 };
 
 // Подробнее о ключевых элементах тут: https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/keynodes/
+
+// добавить противоположные 
