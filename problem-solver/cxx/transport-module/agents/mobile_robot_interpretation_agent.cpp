@@ -78,3 +78,4 @@ ScResult MobileRobotInterpretationAgent::DoProgram(ScEventChangeMobileRobotState
   return m_interpreterCallback(action, robotAddr);
   //прорбный комик
 }
+// влияет ли на чтото что я создатель ветки? могут ли быть изза этого у сани какието проблемы?
