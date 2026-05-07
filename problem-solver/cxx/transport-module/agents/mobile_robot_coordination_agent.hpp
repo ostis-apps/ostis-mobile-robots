@@ -1,7 +1,7 @@
 #pragma once
 
+#include <random>
 #include <sc-memory/sc_agent.hpp>
-
 #include "keynodes/keynodes.hpp"
 
 using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstMembershipArc>;
@@ -26,5 +26,8 @@ private:
 
   void ChangeActualTempArcToNeg(const ScAddr &addr1, const ScAddr &addr2);
   void ChangeActualTempArcToPos(const ScAddr &addr1, const ScAddr &addr2);
-
+  double MobileRobotCoordinationAgent::GetLoadTime(ScAddr const &routeAddr);
+  double MobileRobotCoordinationAgent::GetUnloadTime(ScAddr const &routeAddr);
+  double MobileRobotCoordinationAgent::GenerateTime(double const &min, double const &max);
+  std::mt19937 m_randomGenerator{std::random_device{}()};
 };

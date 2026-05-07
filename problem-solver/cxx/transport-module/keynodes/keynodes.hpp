@@ -58,6 +58,11 @@ public:
   static inline ScKeynode const rrel_start_point{"rrel_start_point", ScType::ConstNodeRole};
   static inline ScKeynode const rrel_end_point{"rrel_end_point", ScType::ConstNodeRole};
 
+  static inline ScKeynode const rrel_min_load_time{"rrel_min_load_time", ScType::ConstNodeRole};
+  static inline ScKeynode const rrel_max_load_time{"rrel_max_load_time", ScType::ConstNodeRole};
+  static inline ScKeynode const rrel_min_unload_time{"rrel_min_unload_time", ScType::ConstNodeRole};
+  static inline ScKeynode const rrel_max_load_time{"rrel_max_unload_time", ScType::ConstNodeRole};
+
   static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeStructure};
   static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};
 };

@@ -1,4 +1,5 @@
 #include "mobile_robot_coordination_agent.hpp"
+#include <sc-memory/sc_link.hpp>
 #include <chrono>
 #include <thread>
 
@@ -56,15 +57,24 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
       if(it3->Next()){
         m_context.EraseElement(it5_1->Get(1));
         m_context.EraseElement(it5_1->Get(4));
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        ScAddr const &arcAddr = m_context.GenerateConnector(ScType::ConstCommonArc, boxAddr, robotAddr);
-        m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::nrel_location, arcAddr);
 
-        ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
-        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
-        ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
+        ScIterator5Ptr it5_2 = m_context.CreateIterator5(ScType::ConstNodeStructure, ScType::ConstPermPosArc, routeStartPointAddr,
+        MobileRobotsKeynodes::rrel_start_point, ScType::ConstPermPosArc);
+        if(it5_2->Next()){
+          ScAddr const &routeAddr = it5_2->Get(0);
 
-        break;
+          int load_time = GetLoadTime(routeAddr);
+
+          std::this_thread::sleep_for(std::chrono::seconds(5));
+          ScAddr const &arcAddr = m_context.GenerateConnector(ScType::ConstCommonArc, boxAddr, robotAddr);
+          m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::nrel_location, arcAddr);
+
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
+          ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
+
+          break;
+        }
       }
       else{
         ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_launched, robotAddr);
@@ -89,6 +99,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
 ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScAction & action, ScAddr const & robotAddr)
 {
   ScAddr const &routeEndPointAddr = NULL;
+  ScAddr const &routeAddr = NULL;
 
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_ready_being_unloaded, robotAddr);
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
@@ -104,32 +115,41 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScActi
       if(it5_1->Next()){
         ScAddr const &routeEndPointAddr = it5_1->Get(2);
         m_context.EraseElement(it5->Get(1));
-        m_context.EraseElement(it5->Get(4));
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        ScAddr const &arcAddr = m_context.GenerateConnector(ScType::ConstCommonArc, boxAddr, routeEndPointAddr);
-        m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::nrel_location, arcAddr);
+        m_context.EraseElement(it5->Get(4));        
 
-        ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
-        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
-        ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
+        ScIterator5Ptr it5_2 = m_context.CreateIterator5(ScType::ConstNodeStructure, ScType::ConstPermPosArc, routeEndPointAddr,
+        MobileRobotsKeynodes::rrel_end_point, ScType::ConstPermPosArc);
+        if(it5_2->Next()){
+          ScAddr const &routeAddr = it5_2->Get(0);
 
-        break;
+          int unload_time = GetUnloadTime(routeAddr);
+
+          std::this_thread::sleep_for(std::chrono::seconds(unload_time));
+          ScAddr const &arcAddr = m_context.GenerateConnector(ScType::ConstCommonArc, boxAddr, routeEndPointAddr);
+          m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::nrel_location, arcAddr);
+
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
+          ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
+
+          break;
+        }
       }
     }
   }
 
-  it5 = m_context.CreateIterator5(ScType::NodeStructure, ScType::ConstPermPosArc, routeEndPointAddr,
+  it5 = m_context.CreateIterator5(ScType::ConstNodeStructure, ScType::ConstPermPosArc, routeEndPointAddr,
      MobileRobotsKeynodes::rrel_end_point, ScType::ConstPermPosArc);
   if(it5->Next()){
     ScAddr const &routeAddr = it5->Get(0);
-    it5 = m_context.CreateIterator5(routeAddr, ScType::ConstPermPosArc, ScType::ConstNode,
+    ScIterator5Ptr it5_1 = m_context.CreateIterator5(routeAddr, ScType::ConstPermPosArc, ScType::ConstNode,
       MobileRobotsKeynodes::rrel_start_point, ScType::ConstPermPosArc);
-    if(it5->Next()){
-      ScAddr const &routeStartPointAddr = it5->Get(2);
-      ScIterator5Ptr it5 = m_context.CreateIterator5(ScType::ConstNode, ScType::ConstCommonArc, routeStartPointAddr,
+    if(it5_1->Next()){
+      ScAddr const &routeStartPointAddr = it5_1->Get(2);
+      ScIterator5Ptr it5_2 = m_context.CreateIterator5(ScType::ConstNode, ScType::ConstCommonArc, routeStartPointAddr,
       MobileRobotsKeynodes::nrel_location, ScType::ActualTempPosArc);
-      if(it5->Next()){
-        ScAddr const &boxAddr = it5->Get(0);
+      if(it5_2->Next()){
+        ScAddr const &boxAddr = it5_2->Get(0);
         if(m_context.CheckConnector(MobileRobotsKeynodes::concept_box, boxAddr, ScType::ConstPermPosArc))
           return action.FinishSuccessfully();
       }
@@ -159,4 +179,46 @@ void MobileRobotCoordinationAgent::ChangeActualTempArcToNeg(const ScAddr &addr1,
     m_context.EraseElement(it3->Get(1));
   }
   m_context.GenerateConnector(ScType::ActualTempNegArc, addr1, addr2);
+}
+
+double MobileRobotCoordinationAgent::GetLoadTime(ScAddr const &routeAddr){
+  double minLoadTime;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(routeAddr, ScType::ConstPermPosArc, ScType::LinkConst, 
+    MobileRobotsKeynodes::rrel_min_load_time, ScType::ConstPermPosArc);
+  if(it5->Next()){
+    ScAddr const &minLoadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(minLoadTimeAddr, minLoadTime);
+  }
+  double maxLoadTime;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(routeAddr, ScType::ConstPermPosArc, ScType::LinkConst, 
+    MobileRobotsKeynodes::rrel_max_load_time, ScType::ConstPermPosArc);
+  if(it5->Next()){
+    ScAddr const &maxLoadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(maxLoadTimeAddr, maxLoadTime);
+  }
+  return GenerateTime(minLoadTime, maxLoadTime);
+}
+
+double MobileRobotCoordinationAgent::GetUnloadTime(ScAddr const &routeAddr){
+  double minUnloadTime;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(routeAddr, ScType::ConstPermPosArc, ScType::LinkConst, 
+    MobileRobotsKeynodes::rrel_min_load_time, ScType::ConstPermPosArc);
+  if(it5->Next()){
+    ScAddr const &minUnloadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(minUnloadTimeAddr, minUnloadTime);
+  }
+  double maxUnloadTime;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(routeAddr, ScType::ConstPermPosArc, ScType::LinkConst, 
+    MobileRobotsKeynodes::rrel_max_load_time, ScType::ConstPermPosArc);
+  if(it5->Next()){
+    ScAddr const &maxUnloadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(maxUnloadTimeAddr, maxUnloadTime);
+  }
+  return GenerateTime(minUnloadTime, maxUnloadTime);
+}
+
+double MobileRobotCoordinationAgent::GenerateTime(double const &min, double const &max)
+{
+  std::uniform_int_distribution<double> timeDistribution(min, max);
+  return timeDistribution(m_randomGenerator);
 }
