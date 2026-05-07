@@ -24,6 +24,20 @@ bool MobileRobotInterpretationAgent::CheckInitiationCondition(ScEventChangeMobil
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & action, ScAddr const & robotAddr)
 {
+  // поиск структуры состояние -дуга-> робот
+  ScIterator3Ptr it3 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::concept_ready_being_loaded,
+    ScType::ActualTempNegArc,
+    robotAddr);
+
+  if (it3->Next())
+    
+    m_context.EraseElement(it3->Get(1));
+
+  m_context.GenerateConnector(
+    ScType::ActualTempNegArc,
+    MobileRobotsKeynodes::concept_ready_being_loaded,
+    robotAddr);
   //добавление состояния "перемещается" 
   //добавление скорости
   //изменение местоположения на точку, принадлежащую пути
