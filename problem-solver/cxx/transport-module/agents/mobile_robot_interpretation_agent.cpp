@@ -24,51 +24,186 @@ bool MobileRobotInterpretationAgent::CheckInitiationCondition(ScEventChangeMobil
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & action, ScAddr const & robotAddr)
 {
+  // добавление состояния "готов к загрузке" (StateReadyBeingLoaded)
   // поиск структуры состояние -дуга-> робот
   ScIterator3Ptr it3 = m_context.CreateIterator3(
     MobileRobotsKeynodes::concept_ready_being_loaded,
     ScType::ActualTempNegArc,
     robotAddr);
-
   if (it3->Next())
-    
+    // удаление дуги
     m_context.EraseElement(it3->Get(1));
 
+  // создание новой дуги
   m_context.GenerateConnector(
-    ScType::ActualTempNegArc,
+    ScType::ActualTempPosArc,
     MobileRobotsKeynodes::concept_ready_being_loaded,
     robotAddr);
-  //добавление состояния "перемещается" 
-  //добавление скорости
-  //изменение местоположения на точку, принадлежащую пути
-  //перемещение в точку загрузки
-  //удаление состояния "перемещается"
-  //удаление скорости
-  //добавление состояния "готов к загрузке" (StateReadyBeingLoaded)
+  
   return action.FinishSuccessfully();
 }
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & action, ScAddr const & robotAddr)
 {
-  //добавление состояние "перемещается"
-  //добавление скорости
+  StartMooving(robotAddr);
+
   //перемещение в следующую точку маршрута
-  //
-  //если припятствие:
-  //  удаление состояния "перемещается"
-  //  удаление скорости
-  //  добавление состояния "остановлен" ??? (не уверен что нужно полностью отключать робота во время ожидания, скорее добавить состояние ожидания)
-  //  пока припятствие:
-  //    проверка на припятствие
-  //  удаление состояния "остановлен" ??? (ожидание)
-  //  добавление состояния "перемещается"
-  //  добавление скорости
-  //  
-  //если точка разгрузки:
-  //  удаление состояние "перемещается"
-  //  удаления скорости
-  //  добавление состояния "готов к разгрузке"(StateReadyBeingUnloaded)
+  ScAddr next_point = GetNextPoint(robotAddr);
+  while(!UnloadingPointCheck(next_point)){
+    if(ObstacleCheck(next_point)){
+    StopMooving(robotAddr);
+
+    //  добавление состояния "ожидание"
+
+    while(ObstacleCheck(next_point)){
+      continue;
+    }
+
+    //  удаление состояния "ожидание"
+
+    StartMooving(robotAddr);
+    }
+    MoveToNextPoint(robotAddr, next_point);
+    next_point = GetNextPoint(robotAddr);
+  }
+  // следующая точка - точка разгрузки
+  MoveToNextPoint(robotAddr, next_point);
+  StopMooving(robotAddr)
+ 
+  //  добавление состояния "готов к разгрузке"
+  ScIterator3Ptr it3 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::concept_ready_being_unloaded,
+    ScType::ActualTempNegArc,
+    robotAddr);
+  if (it3->Next()){
+    // удаление дуги
+    m_context.EraseElement(it3->Get(1));
+  }
+  // создание новой дуги
+  m_context.GenerateConnector(
+    ScType::ActualTempPosArc,
+    MobileRobotsKeynodes::concept_ready_being_unloaded,
+    robotAddr);
+
   return action.FinishSuccessfully();
+}
+
+bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & next_point){
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+    ScType::Node,//?? здесь должен быть путь, @route_example_1
+    ScType::ConstCommonArc,
+    ScType::next_point,
+    MobileRobotsKeynodes::rrel_end_point,
+    ScType::ConstCommonArc);
+  if (it5->Next()){
+    return true
+  }
+  else{return false}
+}
+
+void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point){
+  ScAddr current_point;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+    robotAddr,
+    ScType::ConstCommonArc,
+    ScType::Node,
+    MobileRobotsKeynodes::nrel_location,
+    ScType::ActualTempPosArc);
+  if (it5->Next()){
+    m_context.EraseElement(it5->Get(1))
+    m_context.EraseElement(it5->Get(4))
+  }
+  ScAddr arc = m_context.GenerateConnector(
+    ScType::ConstCommonArc,
+    robotAddr,
+    next_point);
+  m_context.GenerateConnector(
+    ScType::ActualTempPosArc,
+    MobileRobotsKeynodes::nrel_location,
+    arc);
+}
+
+void MobileRobotInterpretationAgent::StartMooving(ScAddr const & robotAddr){
+  //добавление состояние "перемещается"
+  ScIterator3Ptr it3 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::concept_is_mooving,
+    ScType::ActualTempNegArc,
+    robotAddr);
+  if (it3->Next()){
+    // удаление дуги
+    m_context.EraseElement(it3->Get(1));
+  }
+  // создание новой дуги
+  m_context.GenerateConnector(
+    ScType::ActualTempPosArc,
+    MobileRobotsKeynodes::concept_is_mooving,
+    robotAddr);
+
+  //добавление скорости
+}
+
+void MobileRobotInterpretationAgent::StopMooving(ScAddr const & robotAddr){
+  // удаление состояние "перемещается"
+  ScIterator3Ptr it3 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::concept_is_mooving,
+    ScType::ActualTempPosArc,
+    robotAddr);
+  if (it3->Next()){
+    // удаление дуги
+    m_context.EraseElement(it3->Get(1));
+  }
+  // создание новой дуги
+  m_context.GenerateConnector(
+    ScType::ActualTempNegArc,
+    MobileRobotsKeynodes::concept_is_mooving,
+    robotAddr);
+
+  //  удаление скорости
+}
+
+bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & next_point){
+  ScIterator3Ptr it3 = m_context.CreateIterator3(
+    ScType::Node,
+    ScType::ConstCommonArc,
+    next_point);
+  if (it3->Next()){
+    obstacle = it->Get(0)
+    ScIterator3Ptr it3_1 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::concept_obstacle,
+    ScType::ConstCommonArc,
+    obstacle);
+    if (it3_1->Next()){
+      return true
+    }
+  }else{
+    return false
+  }
+}
+
+ScAddr MobileRobotInterpretationAgent::GetNextPoint(ScAddr const & robotAddr){
+  //нахождение текущего положения
+  ScAddr current_point;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+    robotAddr,
+    ScType::ConstCommonArc,
+    ScType::Node,
+    MobileRobotsKeynodes::nrel_location,
+    ScType::ActualTempPosArc);
+  if (it5->Next()){
+    current_point = it5->Get(2)
+  }
+  //нахождения следующего положения
+  ScAddr next_point;
+  it5 = m_context.CreateIterator5(
+    current_point,
+    ScType::ConstCommonArc,
+    ScType::Node,
+    MobileRobotsKeynodes::nrel_next_point,
+    ScType::ConstCommonArc);//дуга принадлежности?
+  if (it5->Next()){
+    next_point = it5->Get(2)
+  }
+  return next_point;
 }
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & action, ScAddr const & robotAddr)
