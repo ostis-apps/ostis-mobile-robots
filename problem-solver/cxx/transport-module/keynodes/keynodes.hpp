@@ -27,9 +27,7 @@ public:
   static inline ScKeynode const concept_loading_process{"concept_loading_process", ScType::ConstNodeClass};
   static inline ScKeynode const concept_unloading_process{"concept_unloading_process", ScType::ConstNodeClass};
   static inline ScKeynode const concept_waiting_obstacle{"concept_waiting_obstacle", ScType::ConstNodeClass};
-  
-  static inline ScKeynode const concept_waiting_obstacle{"concept_waiting_obstacle", ScType::ConstNodeClass};
-  
+    
   static inline ScKeynode const concept_mobile_robot{"concept_mobile_robot", ScType::ConstNodeClass};
   static inline ScKeynode const concept_box{"concept_box", ScType::ConstNodeClass};
   
