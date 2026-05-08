@@ -49,6 +49,10 @@ public:
 
   static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeClass};
   static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};
+  static inline ScKeynode const concept_ready_being_loaded {"concept_ready_being_loaded",ScType::ConstNodeClass}
+  static inline ScKeynode const concept_ready_being_unloaded {"concept_ready_being_unloaded",ScType::ConstNodeClass}
+  static inline ScKeynode const rrel_end_point{"rrel_end_point", ScType::ConstNodeRole};// как задаются ролевые отношения 
+  static inline ScKeynode const concept_is_mooving {"concept_is_mooving",ScType::ConstNodeClass}
 };
 
 // Подробнее о ключевых элементах тут: https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/keynodes/
