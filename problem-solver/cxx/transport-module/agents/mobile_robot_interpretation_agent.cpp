@@ -193,6 +193,7 @@ void MobileRobotInterpretationAgent::StartMooving(ScAddr const & robotAddr){
     robotAddr);
 
   //добавление скорости
+  SetSpeed(robotAddr, 0.5);
 }
 
 void MobileRobotInterpretationAgent::StopMooving(ScAddr const & robotAddr){
@@ -212,6 +213,7 @@ void MobileRobotInterpretationAgent::StopMooving(ScAddr const & robotAddr){
     robotAddr);
 
   //  удаление скорости
+  SetSpeed(robotAddr, 0);
 }
 
 bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & next_point){
@@ -258,6 +260,24 @@ ScAddr MobileRobotInterpretationAgent::GetNextPoint(ScAddr const & robotAddr){
     next_point = it5->Get(2);
   }
   return next_point;
+}
+
+void MobileRobotInterpretationAgent::SetSpeed(ScAddr const & robotAddr, int speedValue){
+  ScIterator3Ptr it3 = m_context.CreateIterator3(
+    ScType::VarNodeLink,
+    ScType::ActualTempPosArc,
+    robotAddr);
+    if (it3->Next()){
+      m_context.EraseElement(it3->Get(1));
+      m_context.EraseElement(it3->Get(0));// можно ли просто удалить один узел, удалится ли связь автоматически?
+    }
+
+  ScAddr speed = m_context.GenerateLink(ScType::VarNodeLink);
+  m_context.SetLinkContent(speed, speedValue);
+  m_context.GenerateConnector(
+    ScType::ActualTempPosArc,
+    speed,
+    robotAddr);
 }
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & action, ScAddr const & robotAddr)

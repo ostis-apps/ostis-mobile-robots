@@ -34,6 +34,8 @@ public:
   bool UploadingPointCheck(ScAddr const & next_point);
 
   bool SetWaitingState(ScAddr const & robotAddr, bool state);
+  
+  void SetSpeed(ScAddr const & robotAddr, int speed);
 
   ScResult InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr);
 
