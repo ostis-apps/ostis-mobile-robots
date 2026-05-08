@@ -19,6 +19,16 @@ public:
 
   ScResult InterpreterStateBoxUnloaded(ScAction & action, ScAddr const & robotAddr);
 
+  void MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point);
+
+  void StartMooving(ScAddr const & robotAddr);
+
+  void StopMooving(ScAddr const & robotAddr);
+
+  bool ObstacleCheck(ScAddr const & next_point);
+
+  ScAddr GetNextPoint(ScAddr const & robotAddr);
+
   ScResult InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr);
 
   ScResult DoProgram(
