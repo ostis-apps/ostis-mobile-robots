@@ -53,6 +53,7 @@ public:
   static inline ScKeynode const concept_ready_being_unloaded {"concept_ready_being_unloaded",ScType::ConstNodeClass}
   static inline ScKeynode const rrel_end_point{"rrel_end_point", ScType::ConstNodeRole};// как задаются ролевые отношения 
   static inline ScKeynode const concept_is_mooving {"concept_is_mooving",ScType::ConstNodeClass}
+  static inline ScKeynode const concept_waiting {"concept_waiting",ScType::ConstNodeClass
 };
 
 // Подробнее о ключевых элементах тут: https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/keynodes/
