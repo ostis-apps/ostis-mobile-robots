@@ -114,8 +114,8 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
     ScType::ActualTempPosArc,
     MobileRobotsKeynodes::nrel_location);
   if (it5->Next()){
-    m_context.EraseElement(it5->Get(1))
-    m_context.EraseElement(it5->Get(4))
+    m_context.EraseElement(it5->Get(1));
+    m_context.EraseElement(it5->Get(4));
   }
   ScAddr arc = m_context.GenerateConnector(
     ScType::ConstCommonArc,
@@ -166,23 +166,25 @@ void MobileRobotInterpretationAgent::StopMooving(ScAddr const & robotAddr){
 }
 
 bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & next_point){
-  ScIterator3Ptr it3 = m_context.CreateIterator3(
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
     ScType::Node,
+    ScType::ConstCommonArc,
+    next_point,
     ScType::ConstPermPosArc,
-    next_point);
-  if (it3->Next()){
-    ScAddr obstacle = it3->Get(0);
-    ScIterator3Ptr it3_1 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::nrel_obstacle_position);
+  if (it5->Next()){
+    ScAddr obstacleAddr = it5->Get(0);
+    ScIterator3Ptr it3 = m_context.CreateIterator3(
     MobileRobotsKeynodes::concept_obstacle,
     ScType::ConstPermPosArc,
-    obstacle);
-    if (it3_1->Next()){
+    obstacleAddr);
+    if (it3->Next()){
       return true;
     }
   }else{
     return false;
   }
-}//переделать
+}
 
 ScAddr MobileRobotInterpretationAgent::GetNextPoint(ScAddr const & robotAddr){
   //нахождение текущего положения
@@ -191,8 +193,8 @@ ScAddr MobileRobotInterpretationAgent::GetNextPoint(ScAddr const & robotAddr){
     robotAddr,
     ScType::ConstCommonArc,
     ScType::Node,
-    MobileRobotsKeynodes::nrel_location,
-    ScType::ConstActualTempPosArc);
+    ScType::ConstActualTempPosArc,
+    MobileRobotsKeynodes::nrel_location);
   if (it5->Next()){
     current_point = it5->Get(2);
   }

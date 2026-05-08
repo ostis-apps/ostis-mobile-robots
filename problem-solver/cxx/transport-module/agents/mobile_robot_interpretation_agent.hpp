@@ -29,6 +29,8 @@ public:
 
   ScAddr GetNextPoint(ScAddr const & robotAddr);
 
+  bool UnloadingPointCheck(ScAddr const & next_point);
+
   ScResult InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr);
 
   ScResult DoProgram(
