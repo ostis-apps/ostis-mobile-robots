@@ -31,6 +31,10 @@ public:
 
   bool UnloadingPointCheck(ScAddr const & next_point);
 
+  bool UploadingPointCheck(ScAddr const & next_point);
+
+  bool SetWaitingState(ScAddr const & robotAddr, bool state);
+
   ScResult InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr);
 
   ScResult DoProgram(

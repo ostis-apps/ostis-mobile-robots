@@ -1,5 +1,7 @@
 #include "mobile_robot_interpretation_agent.hpp"
 #include <time.h>
+#include <thread>   // для std::this_thread::sleep_for
+#include <chrono>   // для std::chrono::milliseconds
 
 ScAddr MobileRobotInterpretationAgent::GetActionClass() const
 {
@@ -40,7 +42,7 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & act
   // создание новой дуги
   m_context.GenerateConnector(
     ScType::ConstActualTempPosArc,
-    MobileRobotsKeynodes::concept_ready_being_loaded,// добавить
+    MobileRobotsKeynodes::concept_ready_being_loaded,
     robotAddr);
   
   return action.FinishSuccessfully();
@@ -48,15 +50,16 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & act
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & action, ScAddr const & robotAddr)
 {
-  StartMooving(robotAddr);// добавить
+  StartMooving(robotAddr);
 
   //перемещение в следующую точку маршрута
-  ScAddr next_point = GetNextPoint(robotAddr);// добавить
-  while(!UnloadingPointCheck(next_point)){// добавить
-    if(ObstacleCheck(next_point)){// добавить
-    StopMooving(robotAddr);// добавить
+  ScAddr next_point = GetNextPoint(robotAddr);
+  while(!UnloadingPointCheck(next_point)){
+    if(ObstacleCheck(next_point)){
+    StopMooving(robotAddr);
 
     //  добавление состояния "ожидание"
+    SetWaitingState(robotAddr, true);
 
     while(ObstacleCheck(next_point)){
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -64,19 +67,20 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & ac
     }
 
     //  удаление состояния "ожидание"
+    SetWaitingState(robotAddr, false);
 
     StartMooving(robotAddr);
     }
-    MoveToNextPoint(robotAddr, next_point);// добавить
+    MoveToNextPoint(robotAddr, next_point);
     next_point = GetNextPoint(robotAddr);
   }
   // следующая точка - точка разгрузки
-  MoveToNextPoint(robotAddr, next_point);// добавить
-  StopMooving(robotAddr);// добавить
+  MoveToNextPoint(robotAddr, next_point);
+  StopMooving(robotAddr);
  
   //  добавление состояния "готов к разгрузке"
   ScIterator3Ptr it3 = m_context.CreateIterator3(
-    MobileRobotsKeynodes::concept_ready_being_unloaded,// добавить
+    MobileRobotsKeynodes::concept_ready_being_unloaded,
     ScType::ActualTempNegArc,
     robotAddr);
   if (it3->Next()){
@@ -86,10 +90,42 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & ac
   // создание новой дуги
   m_context.GenerateConnector(
     ScType::ActualTempPosArc,
-    MobileRobotsKeynodes::concept_ready_being_unloaded,// добавить
+    MobileRobotsKeynodes::concept_ready_being_unloaded,
     robotAddr);
 
   return action.FinishSuccessfully();
+}
+
+bool MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, bool state){
+  if (state){
+    ScIterator3Ptr it3 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::concept_waiting_obstacle,
+    ScType::ActualTempNegArc,
+    robotAddr);
+  if (it3->Next()){
+    // удаление дуги
+    m_context.EraseElement(it3->Get(1));
+  }
+  // создание новой дуги
+  m_context.GenerateConnector(
+    ScType::ActualTempPosArc,
+    MobileRobotsKeynodes::concept_waiting_obstacle,
+    robotAddr);
+  }else{
+    ScIterator3Ptr it3 = m_context.CreateIterator3(
+    MobileRobotsKeynodes::concept_waiting_obstacle,
+    ScType::ActualTempPosArc,
+    robotAddr);
+  if (it3->Next()){
+    // удаление дуги
+    m_context.EraseElement(it3->Get(1));
+  }
+  // создание новой дуги
+  m_context.GenerateConnector(
+    ScType::ActualTempNegArc,
+    MobileRobotsKeynodes::concept_waiting_obstacle,
+    robotAddr);
+  }
 }
 
 bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & next_point){
@@ -98,7 +134,20 @@ bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & next_poi
     ScType::ConstCommonArc,
     next_point,
     ScType::ConstPermPosArc,
-    MobileRobotsKeynodes::rrel_end_point);// добавить
+    MobileRobotsKeynodes::rrel_end_point);
+  if (it5->Next()){
+    return true;
+  }
+  else{return false;}
+}
+
+bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & next_point){
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+    ScType::ConstNodeStructure,
+    ScType::ConstCommonArc,
+    next_point,
+    ScType::ConstPermPosArc,
+    MobileRobotsKeynodes::rrel_start_point);
   if (it5->Next()){
     return true;
   }
@@ -130,7 +179,7 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
 void MobileRobotInterpretationAgent::StartMooving(ScAddr const & robotAddr){
   //добавление состояние "перемещается"
   ScIterator3Ptr it3 = m_context.CreateIterator3(
-    MobileRobotsKeynodes::concept_is_mooving,// добавить
+    MobileRobotsKeynodes::concept_is_mooving,
     ScType::ActualTempNegArc,
     robotAddr);
   if (it3->Next()){
@@ -140,7 +189,7 @@ void MobileRobotInterpretationAgent::StartMooving(ScAddr const & robotAddr){
   // создание новой дуги
   m_context.GenerateConnector(
     ScType::ActualTempPosArc,
-    MobileRobotsKeynodes::concept_is_mooving,// добавить
+    MobileRobotsKeynodes::concept_is_mooving,
     robotAddr);
 
   //добавление скорости
@@ -149,7 +198,7 @@ void MobileRobotInterpretationAgent::StartMooving(ScAddr const & robotAddr){
 void MobileRobotInterpretationAgent::StopMooving(ScAddr const & robotAddr){
   // удаление состояние "перемещается"
   ScIterator3Ptr it3 = m_context.CreateIterator3(
-    MobileRobotsKeynodes::concept_is_mooving,// добавить
+    MobileRobotsKeynodes::concept_is_mooving,
     ScType::ActualTempPosArc,
     robotAddr);
   if (it3->Next()){
@@ -159,7 +208,7 @@ void MobileRobotInterpretationAgent::StopMooving(ScAddr const & robotAddr){
   // создание новой дуги
   m_context.GenerateConnector(
     ScType::ActualTempNegArc,
-    MobileRobotsKeynodes::concept_is_mooving,// добавить
+    MobileRobotsKeynodes::concept_is_mooving,
     robotAddr);
 
   //  удаление скорости
@@ -181,9 +230,8 @@ bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & next_point){
     if (it3->Next()){
       return true;
     }
-  }else{
-    return false;
   }
+  return false;
 }
 
 ScAddr MobileRobotInterpretationAgent::GetNextPoint(ScAddr const & robotAddr){
