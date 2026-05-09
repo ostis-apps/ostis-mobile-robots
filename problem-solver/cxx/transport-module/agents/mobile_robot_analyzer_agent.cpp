@@ -1,107 +1,304 @@
+// mobile_robot_analyzer_agent.cpp
+
 #include "mobile_robot_analyzer_agent.hpp"
-#include <sc-memory/sc_link.hpp>
-#include <sc-memory/sc_agent_context.hpp>
 
 ScAddr MobileRobotAnalyzerAgent::GetActionClass() const
 {
   return MobileRobotsKeynodes::action_analyze_mobile_robot;
 }
 
-bool MobileRobotAnalyzerAgent::CheckInitiationCondition(ScEventChangeMobileRobotState const & event)
+bool MobileRobotAnalyzerAgent::CheckInitiationCondition(
+    ScEventChangeMobileRobotState const & event)
 {
-  ScAddr const & stateAddr = event.GetArcSourceElement();
-  
-  return (stateAddr == MobileRobotsKeynodes::concept_loading_process ||
-          stateAddr == MobileRobotsKeynodes::concept_unloading_process ||
-          stateAddr == MobileRobotsKeynodes::concept_waiting_obstacle ||
-          stateAddr == MobileRobotsKeynodes::concept_launched ||
-          stateAddr == MobileRobotsKeynodes::concept_stopped);
+  ScAddr const & stateAddr =
+      event.GetArcSourceElement();
+
+  ScAddrToValueUnorderedMap<AnalyzerCallback> states =
+  {
+    {
+      MobileRobotsKeynodes::concept_launched,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessStart(action, robotAddr);
+      }
+    },
+
+    {
+      MobileRobotsKeynodes::concept_robot_is_loading,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessLoadingStart(action, robotAddr);
+      }
+    },
+
+    {
+      MobileRobotsKeynodes::concept_box_loaded,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessLoadingEnd(action, robotAddr);
+      }
+    },
+
+    {
+      MobileRobotsKeynodes::concept_robot_is_unloading,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessUnloadingStart(action, robotAddr);
+      }
+    },
+
+    {
+      MobileRobotsKeynodes::concept_box_unloaded,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessUnloadingEnd(action, robotAddr);
+      }
+    },
+
+    {
+      MobileRobotsKeynodes::concept_robot_waiting,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessWaitingStart(action, robotAddr);
+      }
+    },
+
+    {
+      MobileRobotsKeynodes::concept_robot_not_waiting,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessWaitingEnd(action, robotAddr);
+      }
+    },
+
+    {
+      MobileRobotsKeynodes::concept_stopped,
+      [this](ScAction & action,
+             ScAddr const & robotAddr)
+      {
+        return ProcessStop(action, robotAddr);
+      }
+    }
+  };
+
+  auto const & it = states.find(stateAddr);
+
+  if (it == states.cend())
+    return false;
+
+  m_analyzerCallback = it->second;
+
+  return true;
 }
 
-ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
+ScResult MobileRobotAnalyzerAgent::ProcessStart(
+    ScAction & action,
+    ScAddr const & robotAddr)
 {
-  ScAgentContext ctx;
-  
-  ScAddr const & robotAddr = event.GetArcTargetElement(); 
-  ScAddr const & newStateAddr = event.GetArcSourceElement(); 
-  size_t robotHash = robotAddr.Hash();
-  auto now = std::chrono::steady_clock::now();
+  m_experimentStart = steady_clock::now();
 
-  if (m_startTimes.count(robotHash))
-  {
-    auto startTime = m_startTimes[robotHash];
-    double duration = std::chrono::duration<double>(now - startTime).count();
+  m_totalWaitingTime = 0;
+  m_totalLoadingTime = 0;
+  m_totalUnloadingTime = 0;
 
-    UpdateStatistic(robotAddr, MobileRobotsKeynodes::nrel_total_simulation_time, duration);
+  m_statistics.clear();
 
-    ScAddr lastState = m_lastStates[robotHash];
-    
-    if (lastState == MobileRobotsKeynodes::concept_loading_process || 
-        lastState == MobileRobotsKeynodes::concept_unloading_process)
-    {
-      UpdateStatistic(robotAddr, MobileRobotsKeynodes::nrel_total_load_unload_time, duration);
-    }
-    else if (lastState == MobileRobotsKeynodes::concept_waiting_obstacle)
-    {
-      UpdateStatistic(robotAddr, MobileRobotsKeynodes::nrel_total_obstacle_wait_time, duration);
-    }
-  }
-
-  if (newStateAddr == MobileRobotsKeynodes::concept_stopped)
-  {
-    m_startTimes.erase(robotHash);
-    m_lastStates.erase(robotHash);
-    m_logger.Info("Анализатор: Статистика для робота сохранена. Эксперимент завершен.");
-  }
-  else
-  {
-    m_startTimes[robotHash] = now;
-    m_lastStates[robotHash] = newStateAddr;
-    
-    m_logger.Info("Анализатор: Переключение состояния робота. Начата фиксация нового интервала.");
-  }
+  m_logger.Info("Experiment started");
 
   return action.FinishSuccessfully();
 }
 
-void MobileRobotAnalyzerAgent::UpdateStatistic(ScAddr const & robotAddr, ScAddr const & statRelation, double deltaTime)
+ScResult MobileRobotAnalyzerAgent::ProcessLoadingStart(
+    ScAction & action,
+    ScAddr const & robotAddr)
 {
-  ScAgentContext ctx;
-  
-  auto it = ctx.CreateIterator5(
-      robotAddr,
-      ScType::ConstCommonArc,
-      ScType::VarNode,
-      ScType::ConstPermPosArc,
-      statRelation
-  );
+  m_statistics[robotAddr].loadStart =
+      steady_clock::now();
 
-  if (it->Next())
-  {
-    ScAddr linkAddr = it->Get(2);
-    double currentValue = ReadLinkValue(linkAddr);
-    WriteLinkValue(linkAddr, currentValue + deltaTime);
-  }
-  else
-  {
-    m_logger.Error("Анализатор: Не найден узел для записи отношения " + std::to_string(statRelation.Hash()));
-  }
+  m_logger.Info("Loading started");
+
+  return action.FinishSuccessfully();
 }
 
-double MobileRobotAnalyzerAgent::ReadLinkValue(ScAddr const & linkAddr)
+ScResult MobileRobotAnalyzerAgent::ProcessLoadingEnd(
+    ScAction & action,
+    ScAddr const & robotAddr)
 {
-  ScAgentContext ctx;
-  ScLink link(ctx, linkAddr);
-  try {
-    return link.Get<double>();
-  } catch (...) {
-    return 0.0; 
-  }
+  auto end = steady_clock::now();
+
+  double loadTime =
+      duration_cast<seconds>(
+          end -
+          m_statistics[robotAddr].loadStart)
+      .count();
+
+  m_statistics[robotAddr].loadingTime += loadTime;
+
+  m_totalLoadingTime += loadTime;
+
+  m_logger.Info(
+      "Loading finished: "
+      + std::to_string(loadTime));
+
+  return action.FinishSuccessfully();
 }
 
-void MobileRobotAnalyzerAgent::WriteLinkValue(ScAddr const & linkAddr, double value)
+ScResult MobileRobotAnalyzerAgent::ProcessUnloadingStart(
+    ScAction & action,
+    ScAddr const & robotAddr)
 {
-  ScAgentContext ctx;
-  ScLink link(ctx, linkAddr);
-  link.Set(value); 
+  m_statistics[robotAddr].unloadStart =
+      steady_clock::now();
+
+  m_logger.Info("Unloading started");
+
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotAnalyzerAgent::ProcessUnloadingEnd(
+    ScAction & action,
+    ScAddr const & robotAddr)
+{
+  auto end = steady_clock::now();
+
+  double unloadTime =
+      duration_cast<seconds>(
+          end -
+          m_statistics[robotAddr].unloadStart)
+      .count();
+
+  m_statistics[robotAddr].unloadingTime += unloadTime;
+
+  m_totalUnloadingTime += unloadTime;
+
+  m_logger.Info(
+      "Unloading finished: "
+      + std::to_string(unloadTime));
+
+  return action.FinishSuccessfully();
+}
+
+
+ScResult MobileRobotAnalyzerAgent::ProcessWaitingStart(
+    ScAction & action,
+    ScAddr const & robotAddr)
+{
+  m_statistics[robotAddr].waitStart =
+      steady_clock::now();
+
+  m_logger.Info("Waiting started");
+
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotAnalyzerAgent::ProcessWaitingEnd(
+    ScAction & action,
+    ScAddr const & robotAddr)
+{
+  auto end = steady_clock::now();
+
+  double waitTime =
+      duration_cast<seconds>(
+          end -
+          m_statistics[robotAddr].waitStart)
+      .count();
+
+  m_statistics[robotAddr].waitingTime += waitTime;
+
+  m_totalWaitingTime += waitTime;
+
+  m_logger.Info(
+      "Waiting finished: "
+      + std::to_string(waitTime));
+
+  return action.FinishSuccessfully();
+}
+
+ScResult MobileRobotAnalyzerAgent::ProcessStop(
+    ScAction & action,
+    ScAddr const & robotAddr)
+{
+  GenerateReport();
+
+  m_logger.Info("Experiment finished");
+
+  return action.FinishSuccessfully();
+}
+
+void MobileRobotAnalyzerAgent::GenerateReport()
+{
+  auto end = steady_clock::now();
+
+  double totalTime =
+      duration_cast<seconds>(
+          end -
+          m_experimentStart)
+      .count();
+
+  double movementTime =
+      totalTime
+      - m_totalLoadingTime
+      - m_totalUnloadingTime
+      - m_totalWaitingTime;
+
+  m_logger.Info("========== REPORT ==========");
+
+  m_logger.Info(
+      "Total time: "
+      + std::to_string(totalTime));
+
+  m_logger.Info(
+      "Movement time: "
+      + std::to_string(movementTime));
+
+  m_logger.Info(
+      "Waiting time: "
+      + std::to_string(m_totalWaitingTime));
+
+  m_logger.Info(
+      "Loading/unloading time: "
+      + std::to_string(
+          m_totalLoadingTime +
+          m_totalUnloadingTime));
+
+  for (auto const & robot : m_statistics)
+  {
+    m_logger.Info("----- ROBOT -----");
+
+    m_logger.Info(
+        "Waiting: "
+        + std::to_string(
+            robot.second.waitingTime));
+
+    m_logger.Info(
+        "Loading: "
+        + std::to_string(
+            robot.second.loadingTime));
+
+    m_logger.Info(
+        "Unloading: "
+        + std::to_string(
+            robot.second.unloadingTime));
+  }
+
+  m_logger.Info("============================");
+}
+
+ScResult MobileRobotAnalyzerAgent::DoProgram(
+    ScEventChangeMobileRobotState const & event,
+    ScAction & action)
+{
+  ScAddr const & robotAddr =
+      event.GetArcTargetElement();
+
+  return m_analyzerCallback(
+      action,
+      robotAddr);
 }
