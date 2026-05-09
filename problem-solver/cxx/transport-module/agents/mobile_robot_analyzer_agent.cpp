@@ -5,8 +5,26 @@
 
 using namespace std::chrono;
 
-static std::map<size_t, steady_clock::time_point> startTimes;
+// Структура для хранения статистики по роботу
+struct RobotStats {
+  double waitingTime = 0;      // время ожидания препятствий
+  double loadingTime = 0;      // время загрузки
+  double unloadingTime = 0;    // время разгрузки
+  
+  steady_clock::time_point waitStart;
+  steady_clock::time_point loadStart;
+  steady_clock::time_point unloadStart;
+};
+
+static std::map<size_t, RobotStats> robotStats;
+static std::map<size_t, steady_clock::time_point> stateStartTimes;
 static std::map<size_t, ScAddr> lastStates;
+
+// Глобальные счётчики для суммарной статистики
+static double totalWaitingTime = 0;
+static double totalLoadUnloadTime = 0;
+static steady_clock::time_point experimentStartTime;
+static bool experimentRunning = false;
 
 ScAddr MobileRobotAnalyzerAgent::GetActionClass() const
 {
@@ -17,22 +35,14 @@ bool MobileRobotAnalyzerAgent::CheckInitiationCondition(ScEventChangeMobileRobot
 {
   ScAddr const & stateAddr = event.GetArcSourceElement();
   
+  // Добавляем отслеживание ожидания препятствия
   return (stateAddr == MobileRobotsKeynodes::concept_robot_is_loading ||
           stateAddr == MobileRobotsKeynodes::concept_robot_is_unloading ||
           stateAddr == MobileRobotsKeynodes::concept_launched ||
+          stateAddr == MobileRobotsKeynodes::concept_robot_waiting ||
+          stateAddr == MobileRobotsKeynodes::concept_robot_not_waiting ||
           stateAddr == MobileRobotsKeynodes::concept_stopped);
 }
-
-// Отслеживаемые состояния:
-//   - concept_robot_is_loading   (робот загружается)
-//   - concept_robot_is_unloading (робот разгружается)
-//   - concept_launched           (робот движется)
-//   - concept_stopped            (робот остановлен)
-//
-// При каждом изменении состояния запоминается текущее время
-// При следующем изменении вычисляется разница между временами
-// Разница выводится в лог
-// При состоянии stopped данные о роботе удаляются
 
 ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
 {
@@ -41,28 +51,72 @@ ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const
   size_t robotHash = robotAddr.Hash();
   auto now = steady_clock::now();
 
-  // Если у робота уже было состояние - считаем длительность
-  if (startTimes.count(robotHash))
+  if (newStateAddr == MobileRobotsKeynodes::concept_launched && !experimentRunning)
   {
-    auto startTime = startTimes[robotHash];
-    double seconds = duration<double>(now - startTime).count();
-    
-    // Логируем
-    m_logger.Info("Analyzer: Robot state duration: " + std::to_string(seconds) + "s");
+    experimentRunning = true;
+    experimentStartTime = now;
+    totalWaitingTime = 0;
+    totalLoadUnloadTime = 0;
+    robotStats.clear();
+    m_logger.Info("=== АНАЛИЗАТОР: Эксперимент начат ===");
   }
 
-  // Если новое состояние - stopped, удаляем, иначе обновляем
+  if (stateStartTimes.count(robotHash))
+  {
+    auto startTime = stateStartTimes[robotHash];
+    double seconds = duration<double>(now - startTime).count();
+    ScAddr lastState = lastStates[robotHash];
+    
+    if (lastState == MobileRobotsKeynodes::concept_robot_waiting)
+    {
+      robotStats[robotHash].waitingTime += seconds;
+      totalWaitingTime += seconds;
+      m_logger.Info("Анализатор: Робот ожидал " + std::to_string(seconds) + "с");
+    }
+    else if (lastState == MobileRobotsKeynodes::concept_robot_is_loading)
+    {
+      robotStats[robotHash].loadingTime += seconds;
+      totalLoadUnloadTime += seconds;
+      m_logger.Info("Анализатор: Загрузка длилась " + std::to_string(seconds) + "с");
+    }
+    else if (lastState == MobileRobotsKeynodes::concept_robot_is_unloading)
+    {
+      robotStats[robotHash].unloadingTime += seconds;
+      totalLoadUnloadTime += seconds;
+      m_logger.Info("Анализатор: Разгрузка длилась " + std::to_string(seconds) + "с");
+    }
+  }
+
   if (newStateAddr == MobileRobotsKeynodes::concept_stopped)
   {
-    startTimes.erase(robotHash);
+    double totalTime = duration<double>(now - experimentStartTime).count();
+    double movementTime = totalTime - totalWaitingTime - totalLoadUnloadTime;
+    
+    m_logger.Info("========== ИТОГОВЫЙ ОТЧЁТ ==========");
+    m_logger.Info("Общее время эксперимента: " + std::to_string(totalTime) + "с");
+    m_logger.Info("Время движения: " + std::to_string(movementTime) + "с");
+    m_logger.Info("Время ожидания препятствий: " + std::to_string(totalWaitingTime) + "с");
+    m_logger.Info("Время погрузки/разгрузки: " + std::to_string(totalLoadUnloadTime) + "с");
+    
+    for (auto const & [hash, stats] : robotStats)
+    {
+      m_logger.Info("--- Робот ---");
+      m_logger.Info("  Ожидание: " + std::to_string(stats.waitingTime) + "с");
+      m_logger.Info("  Загрузка: " + std::to_string(stats.loadingTime) + "с");
+      m_logger.Info("  Разгрузка: " + std::to_string(stats.unloadingTime) + "с");
+    }
+    m_logger.Info("====================================");
+    
+    
+    stateStartTimes.erase(robotHash);
     lastStates.erase(robotHash);
-    m_logger.Info("Analyzer: Robot stopped");
+    robotStats.erase(robotHash);
+    experimentRunning = false;
   }
   else
   {
-    startTimes[robotHash] = now;
+    stateStartTimes[robotHash] = now;
     lastStates[robotHash] = newStateAddr;
-    m_logger.Info("Analyzer: Robot state changed");
   }
 
   return action.FinishSuccessfully();
