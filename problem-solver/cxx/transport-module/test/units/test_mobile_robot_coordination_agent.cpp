@@ -3,6 +3,7 @@
 
 #include <agents/mobile_robot_coordination_agent.hpp>
 #include <agents/mobile_robot_interpretation_agent.hpp>
+#include <agents/mobile_robot_analyzer_agent.hpp>
 #include <keynodes/keynodes.hpp>
 
 using TransportModuleTest = ScMemoryTest;
@@ -17,6 +18,7 @@ void SubscribeAgents(ScAgentContext & context)
     ScAddr const & robotAddr = it3->Get(2);
     context.SubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
+    context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
 }
 
@@ -29,6 +31,7 @@ void UnsubscribeAgents(ScAgentContext & context)
     ScAddr const & robotAddr = it3->Get(2);
     context.UnsubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
+    context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
 }
 
@@ -43,6 +46,9 @@ TEST_F(TransportModuleTest, CallMobileRobotCoordinationAgent)
     SubscribeAgents(context);
 
     loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_1_robots_initial_states.scs");
+
+    sleep(500);
+    // переписать на ожидание событий остановки всех роботов
 
     UnsubscribeAgents(context);
   }

@@ -42,6 +42,7 @@ bool MobileRobotCoordinationAgent::CheckInitiationCondition(ScEventChangeMobileR
 // При отсутствии коробки робот завершает свою работу
 ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction & action, ScAddr const & robotAddr)
 {
+  m_logger.Info("Start InterpreterStateReadyBeingLoaded");
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
 
@@ -99,6 +100,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
       }
     }
   }
+  m_logger.Info("Finish InterpreterStateReadyBeingLoaded");
   return action.FinishSuccessfully();
 }
 
