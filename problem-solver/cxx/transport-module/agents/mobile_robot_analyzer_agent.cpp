@@ -32,7 +32,7 @@ ScAddr MobileRobotAnalyzerAgent::GetActionClass() const
   return MobileRobotsKeynodes::action_analyze_mobile_robot;
 }
 
-bool MobileRobotAnalyzerAgent::CheckInitiationCondition(ScEventChangeMobileRobotState const & event)
+bool MobileRobotAnalyzerAgent::CheckInitiationCondition(ScEventChangeMobileRobotStateForAnalyzer const & event)
 {
   ScAddr const & stateAddr = event.GetArcSourceElement();
 
@@ -45,7 +45,7 @@ bool MobileRobotAnalyzerAgent::CheckInitiationCondition(ScEventChangeMobileRobot
       || stateAddr == MobileRobotsKeynodes::concept_stopped);
 }
 
-ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
+ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotStateForAnalyzer const & event, ScAction & action)
 {
   ScAddr const & robotAddr = event.GetArcTargetElement();
   ScAddr const & newStateAddr = event.GetArcSourceElement();

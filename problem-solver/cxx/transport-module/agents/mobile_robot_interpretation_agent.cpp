@@ -242,6 +242,7 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
   //   ScAddr speedNode = it3->Get(0);
   //   double speed = speedNode.GetLinkContent();
   // }
+  
   double speed = 0.5;
   double distance = 20;
   double time = distance / speed;
@@ -338,7 +339,7 @@ void MobileRobotInterpretationAgent::SetSpeed(ScAddr const & robotAddr, double s
   if (it3->Next())
   {
     m_context.EraseElement(it3->Get(1));
-    m_context.EraseElement(it3->Get(0));  // можно ли просто удалить один узел, удалится ли связь автоматически?
+    m_context.EraseElement(it3->Get(0));  // можно ли просто удалить один узел, удалится ли связь автоматически? Да, удалится
   }
 
   ScAddr speed = m_context.GenerateLink(ScType::VarNodeLink);

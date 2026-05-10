@@ -4,7 +4,7 @@
 
 #include "keynodes/keynodes.hpp"
 
-using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstMembershipArc>;
+using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstActualTempPosArc>;
 
 class MobileRobotInterpretationAgent : public ScAgent<ScEventChangeMobileRobotState>
 {

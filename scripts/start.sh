@@ -19,7 +19,7 @@ case "$1" in
   machine)
     LD_LIBRARY_PATH="$LD_LIBRARY_PATH" \
       $SC_MACHINE_PATH/bin/sc-machine -s kb.bin \
-      -e "$SC_MACHINE_PATH/lib/extensions;$SCP_MACHINE_PATH/lib/extensions;$SCL_MACHINE_PATH/lib/extensions;$FIXED_SEARCH_STRATEGY_TEMPLATE_PROCESSING_MODULE/lib/extensions;$PROJECT_ROOT_PATH/build/Release/extensions" -c ostis-mobile-robots.ini
+      -e "$SC_MACHINE_PATH/lib/extensions;$SCP_MACHINE_PATH/lib/extensions;$SCL_MACHINE_PATH/lib/extensions;$FIXED_SEARCH_STRATEGY_TEMPLATE_PROCESSING_MODULE/lib/extensions;$PROJECT_ROOT_PATH/build/Debug/extensions" -c ostis-mobile-robots.ini
     ;;
   py_server)
     cd $PROJECT_ROOT_PATH/problem-solver/py || exit 1
