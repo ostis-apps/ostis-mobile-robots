@@ -226,6 +226,20 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
     ScType::ActualTempPosArc,
     MobileRobotsKeynodes::nrel_location,
     arc);
+
+  // задержка для иммитации скорости
+  // ScIterator3Ptr it3 = m_context.CreateIterator3(
+  //   ScType::VarNodeLink,
+  //   ScType::ActualTempPosArc,
+  //   robotAddr);
+  // if (it3->Next()){
+  //   ScAddr speedNode = it3->Get(0);
+  //   double speed = speedNode.GetLinkContent();
+  // }
+  double speed = 0.5;
+  double distance = 20;
+  double time = distance/speed;
+  std::this_thread::sleep_for(std::chrono::duration<double>(time));
 }
 
 void MobileRobotInterpretationAgent::StartMooving(ScAddr const & robotAddr)
@@ -318,7 +332,7 @@ ScAddr MobileRobotInterpretationAgent::GetNextPoint(ScAddr const & robotAddr)
   return next_point;
 }
 
-void MobileRobotInterpretationAgent::SetSpeed(ScAddr const & robotAddr, int speedValue)
+void MobileRobotInterpretationAgent::SetSpeed(ScAddr const & robotAddr, double speedValue)
 {
   ScIterator3Ptr it3 = m_context.CreateIterator3(
     ScType::VarNodeLink,
@@ -336,7 +350,6 @@ void MobileRobotInterpretationAgent::SetSpeed(ScAddr const & robotAddr, int spee
     speed,
     robotAddr);
 }
-
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr)
 {

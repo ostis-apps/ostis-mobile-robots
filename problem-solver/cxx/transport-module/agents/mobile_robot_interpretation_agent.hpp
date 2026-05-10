@@ -35,7 +35,7 @@ public:
 
   bool SetWaitingState(ScAddr const & robotAddr, bool state);
   
-  void SetSpeed(ScAddr const & robotAddr, int speed);
+  void SetSpeed(ScAddr const & robotAddr, double speed);
 
   ScResult InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr);
 
