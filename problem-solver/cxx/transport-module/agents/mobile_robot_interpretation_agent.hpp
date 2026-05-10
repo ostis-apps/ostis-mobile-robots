@@ -4,7 +4,7 @@
 
 #include "keynodes/keynodes.hpp"
 
-using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstMembershipArc>;
+using ScEventChangeMobileRobotState = ScEventAfterGenerateIncomingArc<ScType::ConstPosArc>;
 
 class MobileRobotInterpretationAgent : public ScAgent<ScEventChangeMobileRobotState>
 {
@@ -18,6 +18,24 @@ public:
   ScResult InterpreterStateBoxLoaded(ScAction & action, ScAddr const & robotAddr);
 
   ScResult InterpreterStateBoxUnloaded(ScAction & action, ScAddr const & robotAddr);
+
+  void MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point);
+
+  void StartMooving(ScAddr const & robotAddr);
+
+  void StopMooving(ScAddr const & robotAddr);
+
+  bool ObstacleCheck(ScAddr const & next_point);
+
+  ScAddr GetNextPoint(ScAddr const & robotAddr);
+
+  bool UnloadingPointCheck(ScAddr const & next_point);
+
+  bool UploadingPointCheck(ScAddr const & next_point);
+
+  bool SetWaitingState(ScAddr const & robotAddr, bool state);
+  
+  void SetSpeed(ScAddr const & robotAddr, double speed);
 
   ScResult InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr);
 
