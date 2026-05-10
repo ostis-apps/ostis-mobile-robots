@@ -5,13 +5,12 @@
 #include "agents/mobile_robot_analyzer_agent.hpp"
 #include "agents/random_obstacle_generation_agent.hpp"
 
-
 #include "keynodes/keynodes.hpp"
 
 // Тут надо будет добавить заголовочные файлы для агента генерации случайных препятствий и агента дампа статистики
 
-SC_MODULE_REGISTER(TransportModule)
-  ->Agent<MobileRobotAnalyzerAgent>();
+SC_MODULE_REGISTER(TransportModule)->Agent<MobileRobotAnalyzerAgent>();
+
 // Тут надо зарегистрировать агент генерации случайных препятствий и агент дампа статистики
 // ->Agent<MyAgent>();
 // Подробнее тут https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/modules/
@@ -19,11 +18,8 @@ SC_MODULE_REGISTER(TransportModule)
 void TransportModule::Initialize(ScMemoryContext * _)
 {
   ScAgentContext context;
-  ScIterator3Ptr const it3 = context.CreateIterator3(
-    MobileRobotsKeynodes::concept_mobile_robot,
-    ScType::ConstPermPosArc,
-    ScType::ConstNode
-  );
+  ScIterator3Ptr const it3 =
+      context.CreateIterator3(MobileRobotsKeynodes::concept_mobile_robot, ScType::ConstPermPosArc, ScType::ConstNode);
   while (it3->Next())
   {
     ScAddr const & robotAddr = it3->Get(2);
@@ -35,13 +31,10 @@ void TransportModule::Initialize(ScMemoryContext * _)
 }
 
 void TransportModule::Shutdown(ScMemoryContext * _)
-{  
+{
   ScAgentContext context;
-  ScIterator3Ptr const it3 = context.CreateIterator3(
-    MobileRobotsKeynodes::concept_mobile_robot,
-    ScType::ConstPermPosArc,
-    ScType::ConstNode
-  );
+  ScIterator3Ptr const it3 =
+      context.CreateIterator3(MobileRobotsKeynodes::concept_mobile_robot, ScType::ConstPermPosArc, ScType::ConstNode);
   while (it3->Next())
   {
     ScAddr const & robotAddr = it3->Get(2);
@@ -50,5 +43,4 @@ void TransportModule::Shutdown(ScMemoryContext * _)
     context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
   context.UnsubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
-  
 }

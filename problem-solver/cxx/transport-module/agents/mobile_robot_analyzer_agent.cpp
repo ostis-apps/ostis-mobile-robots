@@ -6,11 +6,12 @@
 using namespace std::chrono;
 
 // Структура для хранения статистики по роботу
-struct RobotStats {
-  double waitingTime = 0;      // время ожидания препятствий
-  double loadingTime = 0;      // время загрузки
-  double unloadingTime = 0;    // время разгрузки
-  
+struct RobotStats
+{
+  double waitingTime = 0;    // время ожидания препятствий
+  double loadingTime = 0;    // время загрузки
+  double unloadingTime = 0;  // время разгрузки
+
   steady_clock::time_point waitStart;
   steady_clock::time_point loadStart;
   steady_clock::time_point unloadStart;
@@ -34,14 +35,14 @@ ScAddr MobileRobotAnalyzerAgent::GetActionClass() const
 bool MobileRobotAnalyzerAgent::CheckInitiationCondition(ScEventChangeMobileRobotState const & event)
 {
   ScAddr const & stateAddr = event.GetArcSourceElement();
-  
+
   // Добавляем отслеживание ожидания препятствия
-  return (stateAddr == MobileRobotsKeynodes::concept_robot_is_loading ||
-          stateAddr == MobileRobotsKeynodes::concept_robot_is_unloading ||
-          stateAddr == MobileRobotsKeynodes::concept_launched ||
-          stateAddr == MobileRobotsKeynodes::concept_robot_waiting ||
-          stateAddr == MobileRobotsKeynodes::concept_robot_not_waiting ||
-          stateAddr == MobileRobotsKeynodes::concept_stopped);
+  return (
+      stateAddr == MobileRobotsKeynodes::concept_robot_is_loading
+      || stateAddr == MobileRobotsKeynodes::concept_robot_is_unloading
+      || stateAddr == MobileRobotsKeynodes::concept_launched || stateAddr == MobileRobotsKeynodes::concept_robot_waiting
+      || stateAddr == MobileRobotsKeynodes::concept_robot_not_waiting
+      || stateAddr == MobileRobotsKeynodes::concept_stopped);
 }
 
 ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
@@ -66,7 +67,7 @@ ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const
     auto startTime = stateStartTimes[robotHash];
     double seconds = duration<double>(now - startTime).count();
     ScAddr lastState = lastStates[robotHash];
-    
+
     if (lastState == MobileRobotsKeynodes::concept_robot_waiting)
     {
       robotStats[robotHash].waitingTime += seconds;
@@ -91,13 +92,13 @@ ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const
   {
     double totalTime = duration<double>(now - experimentStartTime).count();
     double movementTime = totalTime - totalWaitingTime - totalLoadUnloadTime;
-    
+
     m_logger.Info("========== ИТОГОВЫЙ ОТЧЁТ ==========");
     m_logger.Info("Общее время эксперимента: " + std::to_string(totalTime) + "с");
     m_logger.Info("Время движения: " + std::to_string(movementTime) + "с");
     m_logger.Info("Время ожидания препятствий: " + std::to_string(totalWaitingTime) + "с");
     m_logger.Info("Время погрузки/разгрузки: " + std::to_string(totalLoadUnloadTime) + "с");
-    
+
     for (auto const & [hash, stats] : robotStats)
     {
       m_logger.Info("--- Робот ---");
@@ -106,8 +107,7 @@ ScResult MobileRobotAnalyzerAgent::DoProgram(ScEventChangeMobileRobotState const
       m_logger.Info("  Разгрузка: " + std::to_string(stats.unloadingTime) + "с");
     }
     m_logger.Info("====================================");
-    
-    
+
     stateStartTimes.erase(robotHash);
     lastStates.erase(robotHash);
     robotStats.erase(robotHash);

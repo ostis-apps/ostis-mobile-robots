@@ -16,9 +16,7 @@ public:
 
   bool CheckInitiationCondition(ScEventGenerateSimulationTimeTick const & event) override;
 
-  ScResult DoProgram(
-      ScEventGenerateSimulationTimeTick const & event,
-      ScAction & action) override;
+  ScResult DoProgram(ScEventGenerateSimulationTimeTick const & event, ScAction & action) override;
 
 private:
   bool ShouldGenerateObstacle();

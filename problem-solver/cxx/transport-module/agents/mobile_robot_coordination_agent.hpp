@@ -17,17 +17,15 @@ public:
 
   ScResult InterpreterStateReadyBeingUnloaded(ScAction & action, ScAddr const & robotAddr);
 
-  ScResult DoProgram(
-      ScEventChangeMobileRobotState const & event,
-      ScAction & action) override;
-  
+  ScResult DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action) override;
+
 private:
   InterpreterCallback m_interpreterCallback;
 
-  void ChangeActualTempArcToNeg(const ScAddr &addr1, const ScAddr &addr2);
-  void ChangeActualTempArcToPos(const ScAddr &addr1, const ScAddr &addr2);
-  double MobileRobotCoordinationAgent::GetLoadTime(ScAddr const &routeAddr);
-  double MobileRobotCoordinationAgent::GetUnloadTime(ScAddr const &routeAddr);
-  double MobileRobotCoordinationAgent::GenerateTime(double const &min, double const &max);
+  void ChangeActualTempArcToNeg(ScAddr const & addr1, ScAddr const & addr2);
+  void ChangeActualTempArcToPos(ScAddr const & addr1, ScAddr const & addr2);
+  double GetLoadTime(ScAddr const & routeAddr);
+  double GetUnloadTime(ScAddr const & routeAddr);
+  double GenerateTime(int const & min, int const & max);
   std::mt19937 m_randomGenerator{std::random_device{}()};
 };

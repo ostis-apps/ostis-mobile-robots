@@ -10,11 +10,8 @@ std::string const EXAMPLE_MODULE_TEST_FILES_DIR_PATH = "../test-structures/";
 
 void SubscribeAgents(ScAgentContext & context)
 {
-  ScIterator3Ptr const it3 = context.CreateIterator3(
-    MobileRobotsKeynodes::concept_mobile_robot,
-    ScType::ConstPermPosArc,
-    ScType::ConstNode
-  );
+  ScIterator3Ptr const it3 =
+      context.CreateIterator3(MobileRobotsKeynodes::concept_mobile_robot, ScType::ConstPermPosArc, ScType::ConstNode);
   while (it3->Next())
   {
     ScAddr const & robotAddr = it3->Get(2);
@@ -25,11 +22,8 @@ void SubscribeAgents(ScAgentContext & context)
 
 void UnsubscribeAgents(ScAgentContext & context)
 {
-  ScIterator3Ptr const it3 = context.CreateIterator3(
-    MobileRobotsKeynodes::concept_mobile_robot,
-    ScType::ConstPermPosArc,
-    ScType::ConstNode
-  );
+  ScIterator3Ptr const it3 =
+      context.CreateIterator3(MobileRobotsKeynodes::concept_mobile_robot, ScType::ConstPermPosArc, ScType::ConstNode);
   while (it3->Next())
   {
     ScAddr const & robotAddr = it3->Get(2);
@@ -52,7 +46,8 @@ TEST_F(TransportModuleTest, CallMobileRobotCoordinationAgent)
 
     UnsubscribeAgents(context);
   }
-  catch (utils::ScException & e) {
+  catch (utils::ScException & e)
+  {
     std::cout << e.Message() << std::endl;
   }
 }
