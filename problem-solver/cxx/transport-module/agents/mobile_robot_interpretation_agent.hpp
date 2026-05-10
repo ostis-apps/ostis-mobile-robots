@@ -33,7 +33,7 @@ public:
 
   bool UploadingPointCheck(ScAddr const & next_point);
 
-  bool SetWaitingState(ScAddr const & robotAddr, bool state);
+  void SetWaitingState(ScAddr const & robotAddr, bool state);
   
   void SetSpeed(ScAddr const & robotAddr, double speed);
 

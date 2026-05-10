@@ -144,7 +144,7 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
   return action.FinishSuccessfully();
 }
 
-bool MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, bool state)
+void MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, bool state)
 {
   if (state){
     ScIterator3Ptr it3 = m_context.CreateIterator3(
