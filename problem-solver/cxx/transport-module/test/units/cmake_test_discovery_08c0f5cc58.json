@@ -1,15 +1,20 @@
 {
-  "tests": 1,
+  "tests": 2,
   "name": "AllTests",
   "testsuites": [
     {
       "name": "TransportModuleTest",
-      "tests": 1,
+      "tests": 2,
       "testsuite": [
         {
-          "name": "CallMobileRobotCoordinationAgent",
-          "file": "\/home\/artem\/ostis-mobile-robots\/problem-solver\/cxx\/transport-module\/test\/units\/test_mobile_robot_coordination_agent.cpp",
-          "line": 41
+          "name": "CallMobileRobotCoordinationAgent1",
+          "file": "\/home\/artem\/ostis-mobile-robots\/problem-solver\/cxx\/transport-module\/test\/units\/test_mobile_robot_coordination_agent_1.cpp",
+          "line": 3
+        },
+        {
+          "name": "CallMobileRobotCoordinationAgent2",
+          "file": "\/home\/artem\/ostis-mobile-robots\/problem-solver\/cxx\/transport-module\/test\/units\/test_mobile_robot_coordination_agent_2.cpp",
+          "line": 3
         }
       ]
     }

@@ -110,7 +110,7 @@ ScAddr RandomObstacleGenerationAgent::GenerateObstacle(ScMemoryContext & context
 
 ScAddr RandomObstacleGenerationAgent::SelectObstaclePosition(ScMemoryContext & context)
 {
-  ScAddrVector routeArcs;
+  ScAddrVector routePoints;
   ScIterator5Ptr const it5 = context.CreateIterator5(
       ScType::ConstNode,
       ScType::ConstCommonArc,
@@ -119,13 +119,13 @@ ScAddr RandomObstacleGenerationAgent::SelectObstaclePosition(ScMemoryContext & c
       MobileRobotsKeynodes::nrel_next_point);
 
   while (it5->Next())
-    routeArcs.push_back(it5->Get(1));
+    routePoints.push_back(it5->Get(2));
 
-  if (routeArcs.empty())
+  if (routePoints.empty())
     return ScAddr::Empty;
 
-  std::uniform_int_distribution<size_t> positionDistribution(0, routeArcs.size() - 1);
-  return routeArcs[positionDistribution(m_randomGenerator)];
+  std::uniform_int_distribution<size_t> positionDistribution(0, routePoints.size() - 1);
+  return routePoints[positionDistribution(m_randomGenerator)];
 }
 
 int RandomObstacleGenerationAgent::GenerateNextObstacleInterval()

@@ -1,4 +1,7 @@
 #include "mobile_robot_coordination_agent.hpp"
+#include <sc-memory/sc_link.hpp>
+#include <chrono>
+#include <thread>
 
 ScAddr MobileRobotCoordinationAgent::GetActionClass() const
 {
@@ -28,150 +31,185 @@ bool MobileRobotCoordinationAgent::CheckInitiationCondition(ScEventChangeMobileR
   return true;
 }
 
+// Установить для робота состояние "загружается"
+// Найти местоположение робота и из этого местоположения взять свободную коробку и установить через какой-то
+// промежуток времени её в качестве груза робота
+// После этого убрать состояние "загружается" и установить состояние "загружен"
+// убираем состояние "Готов к загрузке"
+// Ставим состояние "Загружается"
+// Нахождение коробки, перемещение ее на агента робота и добавление состояния "Загружен"
+// При отсутствии коробки робот завершает свою работу
 ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction & action, ScAddr const & robotAddr)
 {
-  // Установить для робота состояние "загружается"
-  // Найти местоположение робота и из этого местоположения взять свободную коробку и установить через какой-то
-  // промежуток времени её в качестве груза робота
-  // После этого убрать состояние "загружается" и установить состояние "загружен"
+  m_logger.Info("Start InterpreterStateReadyBeingLoaded");
+  ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
+  ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
 
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+      robotAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNode,
+      ScType::ConstActualTempPosArc,
+      MobileRobotsKeynodes::nrel_location);
+  if (it5->Next())
+  {
+    ScAddr const & routeStartPointAddr = it5->Get(2);
+    ScIterator5Ptr it5_1 = m_context.CreateIterator5(
+        ScType::ConstNode,
+        ScType::ConstCommonArc,
+        routeStartPointAddr,
+        ScType::ConstActualTempPosArc,
+        MobileRobotsKeynodes::nrel_location);
+    while (it5_1->Next())
+    {
+      ScAddr const & boxAddr = it5_1->Get(0);
+      ScIterator3Ptr it3 =
+          m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ConstPermPosArc, boxAddr);
+      if (it3->Next())
+      {
+        m_context.EraseElement(it5_1->Get(1));
 
-  // убираем состояние "Готов к загрузке"
-  ScIterator3Ptr it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_ready_being_loaded, ScType::ActualTempPosArc, robotAddr);
-  if (it3->Next()){
-    m_context.EraseElement(it3->Get(1));
-  }
-  m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
+        ScIterator5Ptr it5_2 = m_context.CreateIterator5(
+            ScType::ConstNodeStructure,
+            ScType::ConstPermPosArc,
+            routeStartPointAddr,
+            ScType::ConstPermPosArc,
+            MobileRobotsKeynodes::rrel_start_point);
+        if (it5_2->Next())
+        {
+          ScAddr const & routeAddr = it5_2->Get(0);
 
-  //ставим состояние "Загружается"
-  it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_robot_is_loading, ScType::ActualTempNegArc, robotAddr);
-  if (it3->Next()){
-    m_context.EraseElement(it3->Get(1));
-  }
-  m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
+          int load_time = GetLoadTime(routeAddr);
 
-  // Добавить временной промежуток на загрузку
+          std::this_thread::sleep_for(std::chrono::seconds(5));
+          ScAddr const & arcAddr = m_context.GenerateConnector(ScType::ConstCommonArc, boxAddr, robotAddr);
+          m_context.GenerateConnector(ScType::ConstActualTempPosArc, MobileRobotsKeynodes::nrel_location, arcAddr);
 
-  // Нахождение коробки, перемещение ее на агента робота и добавление состояния "Загружен"
-  // При отсутствии коробки робот завершает свою работу
-  ScIterator5Ptr it5 = m_context.CreateIterator5(robotAddr, ScType::ConstCommonArc, ScType::Node, 
-    MobileRobotsKeynodes::nrel_location, ScType::ActualTempPosArc);
-  if (it5->Next()){
-    ScIterator5Ptr it5_1 = m_context.CreateIterator5(ScType::Node, ScType::ConstCommonArc, it3->Get(2),
-     MobileRobotsKeynodes::nrel_location, ScType::ConstPermPosArc);
-    if (it5_1->Next()){
-      ScIterator3Ptr it3_1 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ActualTempPosArc, it5_1->Get(0));
-      if(it3_1->Next()){
-        m_context.EraseElement(it5_1->Get(4));
-        m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::nrel_location, it5_1->Get(1));
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
+          ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
 
-        ScIterator3Ptr it3_2 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box_unloaded, ScType::ActualTempPosArc, robotAddr);
-        if (it3_2->Next()){
-          m_context.EraseElement(it3_2->Get(1));
+          break;
         }
-        m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
-
-        it3_2 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box_loaded, ScType::ActualTempNegArc, robotAddr);
-        if (it3_2->Next()){
-          m_context.EraseElement(it3_2->Get(1));
-        }
-        m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::concept_box_loaded, robotAddr);
-
-        it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_robot_is_loading, ScType::ActualTempPosArc, robotAddr);
-        if (it3->Next()){
-        m_context.EraseElement(it3->Get(1));
-        }
-        m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
       }
-      else{
-        it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_launched, ScType::ActualTempPosArc, robotAddr);
-        if(it3->Next()){
-          m_context.EraseElement(it3->Get(1));
-          m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_launched, robotAddr);
-        }
+      else
+      {
+        ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_launched, robotAddr);
+        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_stopped, robotAddr);
       }
     }
   }
-
-
+  m_logger.Info("Finish InterpreterStateReadyBeingLoaded");
   return action.FinishSuccessfully();
 }
 
+// Установить для робота состояние "разгружается"
+// Найти местоположение робота и из этого местоположения взять свободную коробку и установить через какой-то
+// промежуток времени её в качестве груза робота
+// После этого убрать состояние "разгружается" и установить состояние "разгружен"
+
+// Убираем состояние "Готов к разгрузке"
+// Ставим состояние "Разгружается"
+// Добавить временной промежуток на разгрузку
+
+// Перемещение коробки с агента-робота в пункт разгрузки (процесс разгрузка)
+// Добавление состояния "Разгружен"
+// Если в пункте загрузки нет коробок - прекращение работы
 ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScAction & action, ScAddr const & robotAddr)
 {
-  // Установить для робота состояние "разгружается"
-  // Найти местоположение робота и из этого местоположения взять свободную коробку и установить через какой-то
-  // промежуток времени её в качестве груза робота
-  // После этого убрать состояние "разгружается" и установить состояние "разгружен"
+  ScAddr const routeEndPointAddr;
+  ScAddr const routeAddr;
 
-  // убираем состояние "Готов к разгрузке"
-  ScIterator3Ptr it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_ready_being_unloaded, ScType::ActualTempPosArc, robotAddr);
-  if (it3->Next()){
-    m_context.EraseElement(it3->Get(1));
-  }
-  m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
+  ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_ready_being_unloaded, robotAddr);
+  ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
 
-  //ставим состояние "Разгружается"
-  it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_robot_is_unloading, ScType::ActualTempNegArc, robotAddr);
-  if (it3->Next()){
-    m_context.EraseElement(it3->Get(1));
-  }
-  m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+      ScType::ConstNode,
+      ScType::ConstCommonArc,
+      robotAddr,
+      ScType::ConstActualTempPosArc,
+      MobileRobotsKeynodes::nrel_location);
+  while (it5->Next())
+  {
+    ScAddr const & boxAddr = it5->Get(0);
+    ScIterator3Ptr it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ConstPermPosArc, boxAddr);
+    if (it3->Next())
+    {
+      ScIterator5Ptr it5_1 = m_context.CreateIterator5(
+          robotAddr,
+          ScType::ConstCommonArc,
+          ScType::ConstNode,
+          ScType::ConstActualTempPosArc,
+          MobileRobotsKeynodes::nrel_location);
+      if (it5_1->Next())
+      {
+        ScAddr const & routeEndPointAddr = it5_1->Get(2);
+        m_context.EraseElement(it5->Get(1));
 
-  // Добавить временной промежуток на разгрузку
+        ScIterator5Ptr it5_2 = m_context.CreateIterator5(
+            ScType::ConstNodeStructure,
+            ScType::ConstPermPosArc,
+            routeEndPointAddr,
+            ScType::ConstPermPosArc,
+            MobileRobotsKeynodes::rrel_end_point);
+        if (it5_2->Next())
+        {
+          ScAddr const & routeAddr = it5_2->Get(0);
 
-  // Перемещение коробки с агента-робота в пункт разгрузки (процесс разгрузка)
-  // добавление состояния "Разгружен"
-  // если в пункте загрузки нет коробок - прекращение работы 
-  ScIterator5Ptr it5 = m_context.CreateIterator5(ScType::Node, ScType::ConstCommonArc, robotAddr, 
-    MobileRobotsKeynodes::nrel_location, ScType::ActualTempPosArc);
-  if (it5->Next()){
-    ScIterator3Ptr it3_1 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ActualTempPosArc, it5->Get(0));
-    if(it3_1->Next()){
-      m_context.EraseElement(it5->Get(4));
-      ScIterator5Ptr it5_1 = m_context.CreateIterator5(robotAddr, ScType::ConstCommonArc, ScType::Node,
-     MobileRobotsKeynodes::nrel_location, ScType::ConstPermPosArc);
-     if(it5_1->Next()){
-      m_context.GenerateConnector(ScType::ActualTempPosArc, it5->Get(0), it5_1->Get(2));
+          int unload_time = GetUnloadTime(routeAddr);
 
-      ScIterator3Ptr it3_2 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box_loaded, ScType::ActualTempPosArc, robotAddr);
-      if (it3_2->Next()){
-        m_context.EraseElement(it3_2->Get(1));
-      }
-      m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_box_loaded, robotAddr);
+          std::this_thread::sleep_for(std::chrono::seconds(unload_time));
+          ScAddr const & arcAddr = m_context.GenerateConnector(ScType::ConstCommonArc, boxAddr, routeEndPointAddr);
+          m_context.GenerateConnector(ScType::ConstActualTempPosArc, MobileRobotsKeynodes::nrel_location, arcAddr);
 
-      it3_2 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box_unloaded, ScType::ActualTempNegArc, robotAddr);
-      if (it3_2->Next()){
-        m_context.EraseElement(it3_2->Get(1));
-      }
-      m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
+          ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
+          ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
 
-      it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_robot_is_unloading, ScType::ActualTempPosArc, robotAddr);
-      m_context.EraseElement(it3->Get(1));
-      if (it3->Next()){
-      }
-      m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
-
+          break;
+        }
       }
     }
   }
-  // тут поменять ScType::ClassNode на ScStructure
-  it5 = m_context.CreateIterator5(ScType::Node, ScType::ConstPermPosArc, ScType::Node,
-     MobileRobotsKeynodes::rrel_start_point, ScType::ConstPermPosArc);
-  if (it5->Next()){
-    ScIterator5Ptr it5_1 = m_context.CreateIterator5(ScType::Node, ScType::ConstCommonArc, it5->Get(2),
-     MobileRobotsKeynodes::nrel_location, ScType::ConstPermPosArc);
-     if(it5_1->Next()){
-      if(m_context.CheckConnector(MobileRobotsKeynodes::concept_box, it5_1->Get(0), ScType::ConstPermPosArc))
-        return action.FinishSuccessfully();
-     }
-     it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_launched, ScType::ActualTempPosArc, robotAddr);
-      if(it3->Next()){
-        m_context.EraseElement(it3->Get(1));
-        m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_launched, robotAddr);
+
+  it5 = m_context.CreateIterator5(
+      ScType::ConstNodeStructure,
+      ScType::ConstPermPosArc,
+      routeEndPointAddr,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::rrel_end_point);
+  if (it5->Next())
+  {
+    ScAddr const & routeAddr = it5->Get(0);
+    ScIterator5Ptr it5_1 = m_context.CreateIterator5(
+        routeAddr,
+        ScType::ConstPermPosArc,
+        ScType::ConstNode,
+        ScType::ConstPermPosArc,
+        MobileRobotsKeynodes::rrel_start_point);
+    if (it5_1->Next())
+    {
+      ScAddr const & routeStartPointAddr = it5_1->Get(2);
+      ScIterator5Ptr it5_2 = m_context.CreateIterator5(
+          ScType::ConstNode,
+          ScType::ConstCommonArc,
+          routeStartPointAddr,
+          ScType::ConstActualTempPosArc,
+          MobileRobotsKeynodes::nrel_location);
+      if (it5_2->Next())
+      {
+        ScAddr const & boxAddr = it5_2->Get(0);
+        if (m_context.CheckConnector(MobileRobotsKeynodes::concept_box, boxAddr, ScType::ConstPermPosArc))
+          return action.FinishSuccessfully();
       }
+      
+      ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_launched, robotAddr);
+      ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_stopped, robotAddr);
+
+      return action.FinishSuccessfully();
+    }
   }
-  return action.FinishSuccessfully();
+  return action.FinishUnsuccessfully();
 }
 
 ScResult MobileRobotCoordinationAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
@@ -180,4 +218,86 @@ ScResult MobileRobotCoordinationAgent::DoProgram(ScEventChangeMobileRobotState c
   return m_interpreterCallback(action, robotAddr);
 }
 
-// убрать излишние операции по нахождению и записывать результаты в переменные типа ScAddr
+void MobileRobotCoordinationAgent::ChangeActualTempArcToPos(ScAddr const & addr1, ScAddr const & addr2)
+{
+  ScIterator3Ptr it3 = m_context.CreateIterator3(addr1, ScType::ConstActualTempNegArc, addr2);
+  if (it3->Next())
+  {
+    m_context.EraseElement(it3->Get(1));
+  }
+  m_context.GenerateConnector(ScType::ConstActualTempPosArc, addr1, addr2);
+}
+
+void MobileRobotCoordinationAgent::ChangeActualTempArcToNeg(ScAddr const & addr1, ScAddr const & addr2)
+{
+  ScIterator3Ptr it3 = m_context.CreateIterator3(addr1, ScType::ConstActualTempPosArc, addr2);
+  if (it3->Next())
+  {
+    m_context.EraseElement(it3->Get(1));
+  }
+  m_context.GenerateConnector(ScType::ConstActualTempNegArc, addr1, addr2);
+}
+
+double MobileRobotCoordinationAgent::GetLoadTime(ScAddr const & routeAddr)
+{
+  double minLoadTime;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+      routeAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNodeLink,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_min_load_time);
+  if (it5->Next())
+  {
+    ScAddr const & minLoadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(minLoadTimeAddr, minLoadTime);
+  }
+  double maxLoadTime;
+  it5 = m_context.CreateIterator5(
+      routeAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNodeLink,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_max_load_time);
+  if (it5->Next())
+  {
+    ScAddr const & maxLoadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(maxLoadTimeAddr, maxLoadTime);
+  }
+  return GenerateTime(minLoadTime, maxLoadTime);
+}
+
+double MobileRobotCoordinationAgent::GetUnloadTime(ScAddr const & routeAddr)
+{
+  double minUnloadTime;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+      routeAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNodeLink,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_min_unload_time);
+  if (it5->Next())
+  {
+    ScAddr const & minUnloadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(minUnloadTimeAddr, minUnloadTime);
+  }
+  double maxUnloadTime;
+  it5 = m_context.CreateIterator5(
+      routeAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNodeLink,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_max_unload_time);
+  if (it5->Next())
+  {
+    ScAddr const & maxUnloadTimeAddr = it5->Get(2);
+    m_context.GetLinkContent(maxUnloadTimeAddr, maxUnloadTime);
+  }
+  return GenerateTime(minUnloadTime, maxUnloadTime);
+}
+
+double MobileRobotCoordinationAgent::GenerateTime(int const & min, int const & max)
+{
+  std::uniform_int_distribution<int> timeDistribution(min, max);
+  return timeDistribution(m_randomGenerator);
+}
