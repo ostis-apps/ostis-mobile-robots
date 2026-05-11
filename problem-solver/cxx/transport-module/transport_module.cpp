@@ -6,6 +6,7 @@
 #include "agents/random_obstacle_generation_agent.hpp"
 
 
+
 #include "keynodes/keynodes.hpp"
 
 // Тут надо будет добавить заголовочные файлы для агента генерации случайных препятствий и агента дампа статистики
@@ -31,11 +32,14 @@ void TransportModule::Initialize(ScMemoryContext * _)
     context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
     context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
-  context.SubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
+
+  m_randomObstacleGenerationAgent.Start();
 }
 
 void TransportModule::Shutdown(ScMemoryContext * _)
 {  
+  m_randomObstacleGenerationAgent.Stop();
+
   ScAgentContext context;
   ScIterator3Ptr const it3 = context.CreateIterator3(
     MobileRobotsKeynodes::concept_mobile_robot,
@@ -49,6 +53,4 @@ void TransportModule::Shutdown(ScMemoryContext * _)
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
     context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
-  context.UnsubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
-  
 }

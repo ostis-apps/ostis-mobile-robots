@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sc-memory/sc_agent.hpp>
 #include <sc-memory/sc_keynodes.hpp>
 
 using InterpreterCallback = std::function<ScResult(ScAction & action, ScAddr const &)>;
