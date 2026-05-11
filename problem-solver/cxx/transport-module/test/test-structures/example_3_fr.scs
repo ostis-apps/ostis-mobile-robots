@@ -1,0 +1,70 @@
+// маршрут
+@route_example_1 = [*
+    -> rrel_start_point: ..pointA;;
+    -> rrel_end_point: ..pointB;;
+
+    ..pointA => nrel_next_point: ..point1;;
+    ..point1 => nrel_next_point: ..point2;;
+    ..point2 => nrel_next_point: ..point3;;
+    ..point3 => nrel_next_point: ..point4;;
+    ..point4 => nrel_next_point: ..pointB;;
+    ..pointB => nrel_next_point: ..point5;;
+    ..point5 => nrel_next_point: ..point6;;
+    ..point6 => nrel_next_point: ..point7;;
+    ..point7 => nrel_next_point: ..pointA;;
+*];;
+@route_example_1 <- concept_route;;
+
+// коробки
+..box1
+<- concept_box;;
+nrel_location ~> (..box1 => ..pointA);;
+
+..box2
+<- concept_box;;
+nrel_location ~> (..box2 => ..pointA);;
+
+..box3
+<- concept_box;;
+nrel_location ~> (..box3 => ..pointA);;
+
+..box4
+<- concept_box;;
+nrel_location ~> (..box4 => ..pointA);;
+
+..box5
+<- concept_box;;
+nrel_location ~> (..box5 => ..pointA);;
+
+..box6
+<- concept_box;;
+nrel_location ~> (..box6 => ..pointA);;
+
+..box7
+<- concept_box;;
+nrel_location ~> (..box7 => ..pointA);;
+
+..box8
+<- concept_box;;
+nrel_location ~> (..box8 => ..pointA);;
+
+..box9
+<- concept_box;;
+nrel_location ~> (..box9 => ..pointA);;
+
+..box10
+<- concept_box;;
+nrel_location ~> (..box10 => ..pointA);;
+
+// роботы
+robot1
+<- concept_mobile_robot;;
+nrel_location ~> (robot1 => ..pointA);;
+
+robot2
+<- concept_mobile_robot;;
+nrel_location ~> (robot2 => ..pointA);;
+
+robot3
+<- concept_mobile_robot;;
+nrel_location ~> (robot3 => ..pointA);;

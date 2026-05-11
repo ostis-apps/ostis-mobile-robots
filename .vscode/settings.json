@@ -97,6 +97,6 @@
         "list": "cpp",
         "any": "cpp"
     },
-    "cmake.sourceDirectory": "/home/artem/ostis-mobile-robots",
-    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
+    "cmake.sourceDirectory": "/Users/sas/Documents/second_kurs/KP/ostis-mobile-robots",
+    "C_Cpp.default.compilerPath": "/usr/bin/clang++"
 }

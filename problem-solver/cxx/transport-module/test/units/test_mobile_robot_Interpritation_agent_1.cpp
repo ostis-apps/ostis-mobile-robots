@@ -1,18 +1,18 @@
 #include "test_utils.hpp"
 
-TEST_F(TransportModuleTest, CallMobileRobotInterpretationAgent1)
+TEST_F(TransportModuleTest, CallMobileRobotCoordinationAgent11)
 {
   try
   {
     ScAgentContext context;
     ScsLoader loader;
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_3.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_1.scs");
 
     SubscribeAgents(context);
 
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_3_robots_initial_states.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_1_robots_initial_states.scs");
 
-    sleep(15);
+    sleep(5);
     // переписать на ожидание событий остановки всех роботов
 
     UnsubscribeAgents(context);
