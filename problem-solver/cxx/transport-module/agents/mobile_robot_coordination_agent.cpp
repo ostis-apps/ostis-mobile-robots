@@ -41,7 +41,7 @@ bool MobileRobotCoordinationAgent::CheckInitiationCondition(ScEventChangeMobileR
 // При отсутствии коробки робот завершает свою работу
 ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction & action, ScAddr const & robotAddr)
 {
-  m_logger.Info("Start InterpreterStateReadyBeingLoaded");
+  SC_LOG_INFO("Start InterpreterStateReadyBeingLoaded");
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
 
@@ -60,6 +60,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
         routeStartPointAddr,
         ScType::ConstActualTempPosArc,
         MobileRobotsKeynodes::nrel_location);
+    bool box_is_founded = false;
     while (it5_1->Next())
     {
       ScAddr const & boxAddr = it5_1->Get(0);
@@ -67,6 +68,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
           m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ConstPermPosArc, boxAddr);
       if (it3->Next())
       {
+        SC_LOG_INFO("Box is found at StartPoint");
         m_context.EraseElement(it5_1->Get(1));
 
         ScIterator5Ptr it5_2 = m_context.CreateIterator5(
@@ -89,17 +91,18 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
           ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
           ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
 
+          box_is_founded = true;
           break;
         }
       }
-      else
-      {
-        ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_launched, robotAddr);
-        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_stopped, robotAddr);
-      }
+    }
+    if(!box_is_founded){
+      SC_LOG_INFO("No boxes at StartPoint");
+      ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_launched, robotAddr);
+      ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_stopped, robotAddr);
     }
   }
-  m_logger.Info("Finish InterpreterStateReadyBeingLoaded");
+  SC_LOG_INFO("Finish InterpreterStateReadyBeingLoaded");
   return action.FinishSuccessfully();
 }
 
@@ -117,6 +120,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
 // Если в пункте загрузки нет коробок - прекращение работы
 ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScAction & action, ScAddr const & robotAddr)
 {
+  SC_LOG_INFO("Start InterpreterStateReadyBeingUnloaded");
   ScAddr const routeEndPointAddr;
   ScAddr const routeAddr;
 

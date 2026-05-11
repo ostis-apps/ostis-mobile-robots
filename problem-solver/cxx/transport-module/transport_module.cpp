@@ -25,9 +25,9 @@ void TransportModule::Initialize(ScMemoryContext * _)
     ScAddr const & robotAddr = it3->Get(2);
     context.SubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
-    context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
+    // context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
-  context.SubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
+  // context.SubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
 }
 
 void TransportModule::Shutdown(ScMemoryContext * _)
@@ -40,7 +40,7 @@ void TransportModule::Shutdown(ScMemoryContext * _)
     ScAddr const & robotAddr = it3->Get(2);
     context.UnsubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
-    context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
+    // context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
-  context.UnsubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
+  // context.UnsubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
 }

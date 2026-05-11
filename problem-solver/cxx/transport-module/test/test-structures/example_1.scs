@@ -24,47 +24,7 @@ nrel_location ~> (..box1 => ..pointA);;
 <- concept_box;;
 nrel_location ~> (..box2 => ..pointA);;
 
-..box3
-<- concept_box;;
-nrel_location ~> (..box3 => ..pointA);;
-
-..box4
-<- concept_box;;
-nrel_location ~> (..box4 => ..pointA);;
-
-..box5
-<- concept_box;;
-nrel_location ~> (..box5 => ..pointA);;
-
-..box6
-<- concept_box;;
-nrel_location ~> (..box6 => ..pointA);;
-
-..box7
-<- concept_box;;
-nrel_location ~> (..box7 => ..pointA);;
-
-..box8
-<- concept_box;;
-nrel_location ~> (..box8 => ..pointA);;
-
-..box9
-<- concept_box;;
-nrel_location ~> (..box9 => ..pointA);;
-
-..box10
-<- concept_box;;
-nrel_location ~> (..box10 => ..pointA);;
-
 // роботы
 robot1
 <- concept_mobile_robot;;
 nrel_location ~> (robot1 => ..pointA);;
-
-robot2
-<- concept_mobile_robot;;
-nrel_location ~> (robot2 => ..pointA);;
-
-robot3
-<- concept_mobile_robot;;
-nrel_location ~> (robot3 => ..pointA);;

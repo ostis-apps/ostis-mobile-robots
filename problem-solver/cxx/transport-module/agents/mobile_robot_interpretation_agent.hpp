@@ -21,9 +21,9 @@ public:
 
   void MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point);
 
-  void StartMooving(ScAddr const & robotAddr);
+  void StartMoving(ScAddr const & robotAddr);
 
-  void StopMooving(ScAddr const & robotAddr);
+  void StopMoving(ScAddr const & robotAddr);
 
   bool ObstacleCheck(ScAddr const & next_point);
 
@@ -43,4 +43,8 @@ public:
 
 private:
   InterpreterCallback m_interpreterCallback;
+
+  void ChangeActualTempArcToPos(ScAddr const & addr1, ScAddr const & addr2);
+  void ChangeActualTempArcToNeg(ScAddr const & addr1, ScAddr const & addr2);
+
 };

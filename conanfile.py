@@ -10,7 +10,7 @@ class ostis_mobile_robotsecipe(ConanFile):
         return tools.get_env("CONAN_RUN_TESTS", False)
     
     def requirements(self):
-        self.requires("sc-machine/0.10.5", override=True)
+        self.requires("sc-machine/0.10.6", override=True)
         self.requires("scl-machine/0.3.1")
         self.requires("ps-common-lib/0.1.1")
 
