@@ -35,6 +35,12 @@ private:
 
   ScAddr SelectObstaclePosition(ScMemoryContext & context);
 
+  ScAddrVector CollectActiveRoutePoints(ScMemoryContext & context);
+
+  ScAddr FindRouteByPoint(ScMemoryContext & context, ScAddr const & pointAddr);
+
+  ScAddr GetRobotCurrentPosition(ScMemoryContext & context, ScAddr const & robotAddr);
+
   int GenerateNextObstacleInterval();
 
   int GenerateObstacleLifetime();

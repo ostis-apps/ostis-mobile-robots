@@ -110,22 +110,96 @@ ScAddr RandomObstacleGenerationAgent::GenerateObstacle(ScMemoryContext & context
 
 ScAddr RandomObstacleGenerationAgent::SelectObstaclePosition(ScMemoryContext & context)
 {
-  ScAddrVector routePoints;
-  ScIterator5Ptr const it5 = context.CreateIterator5(
-      ScType::ConstNode,
-      ScType::ConstCommonArc,
-      ScType::ConstNode,
-      ScType::ConstPermPosArc,
-      MobileRobotsKeynodes::nrel_next_point);
-
-  while (it5->Next())
-    routePoints.push_back(it5->Get(2));
+  ScAddrVector routePoints = CollectActiveRoutePoints(context);
 
   if (routePoints.empty())
     return ScAddr::Empty;
 
   std::uniform_int_distribution<size_t> positionDistribution(0, routePoints.size() - 1);
   return routePoints[positionDistribution(m_randomGenerator)];
+}
+
+ScAddrVector RandomObstacleGenerationAgent::CollectActiveRoutePoints(ScMemoryContext & context)
+{
+  ScAddrVector routePoints;
+  ScIterator3Ptr const activeRobotIt3 = context.CreateIterator3(
+      MobileRobotsKeynodes::concept_launched,
+      ScType::ConstActualTempPosArc,
+      ScType::ConstNode);
+
+  while (activeRobotIt3->Next())
+  {
+    ScAddr const robotAddr = activeRobotIt3->Get(2);
+    if (!context.CheckConnector(MobileRobotsKeynodes::concept_mobile_robot, robotAddr, ScType::ConstPermPosArc))
+      continue;
+
+    ScAddr const currentPositionAddr = GetRobotCurrentPosition(context, robotAddr);
+    if (!currentPositionAddr.IsValid())
+      continue;
+
+    ScAddr const activeRouteAddr = FindRouteByPoint(context, currentPositionAddr);
+    if (!activeRouteAddr.IsValid())
+      continue;
+
+    ScIterator5Ptr const routePointIt5 = context.CreateIterator5(
+        activeRouteAddr,
+        ScType::ConstPermPosArc,
+        ScType::ConstCommonArc,
+        ScType::ConstPermPosArc,
+        MobileRobotsKeynodes::nrel_next_point);
+
+    while (routePointIt5->Next())
+    {
+      auto const [_, targetPointAddr] = context.GetConnectorIncidentElements(routePointIt5->Get(2));
+      routePoints.push_back(targetPointAddr);
+    }
+  }
+
+  return routePoints;
+}
+
+ScAddr RandomObstacleGenerationAgent::FindRouteByPoint(ScMemoryContext & context, ScAddr const & pointAddr)
+{
+  ScIterator5Ptr const routeArcIt5 = context.CreateIterator5(
+      ScType::ConstNode,
+      ScType::ConstCommonArc,
+      ScType::ConstNode,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_next_point);
+
+  while (routeArcIt5->Next())
+  {
+    ScAddr const routeArcAddr = routeArcIt5->Get(1);
+    auto const [sourcePointAddr, targetPointAddr] = context.GetConnectorIncidentElements(routeArcAddr);
+
+    if (sourcePointAddr != pointAddr && targetPointAddr != pointAddr)
+      continue;
+
+    ScIterator3Ptr const routeIt3 = context.CreateIterator3(
+        ScType::ConstNodeStructure,
+        ScType::ConstPermPosArc,
+        routeArcAddr);
+
+    if (routeIt3->Next())
+      return routeIt3->Get(0);
+  }
+
+  return ScAddr::Empty;
+}
+
+ScAddr RandomObstacleGenerationAgent::GetRobotCurrentPosition(ScMemoryContext & context, ScAddr const & robotAddr)
+{
+  ScIterator5Ptr const locationIt5 = context.CreateIterator5(
+      robotAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNode,
+      ScType::ConstActualTempPosArc,
+      MobileRobotsKeynodes::nrel_location);
+
+  if (locationIt5->Next())
+    return locationIt5->Get(2);
+
+  return ScAddr::Empty;
 }
 
 int RandomObstacleGenerationAgent::GenerateNextObstacleInterval()
