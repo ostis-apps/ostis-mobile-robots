@@ -45,7 +45,7 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & act
 {
   if (IsStopped(robotAddr))
     return action.FinishSuccessfully();
-  SC_LOG_INFO("InterpreterStateLaunched");
+  SC_LOG_INFO("$$$$Robot was turn on");
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNode,
       ScType::ConstCommonArc,
@@ -58,12 +58,12 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & act
     ScIterator3Ptr it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ConstPermPosArc, boxAddr);
     if (it3->Next())
     {
-      SC_LOG_INFO("INITIALLY THERE IS ONE BOX ON ROBOT");
+      SC_LOG_INFO("$$$$box_load");
       ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
       return action.FinishSuccessfully();
     }
   }
-  SC_LOG_INFO("INITIALLY THERE IS NO BOX ON ROBOT");
+  SC_LOG_INFO("$$$$INITIALLY THERE IS NO BOX ON ROBOT");
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
   return action.FinishSuccessfully();
 }
@@ -73,7 +73,7 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & ac
   if (IsStopped(robotAddr))
     return action.FinishSuccessfully();
 
-  SC_LOG_INFO("InterpreterStateBoxLoaded");
+  SC_LOG_INFO("$$$$robot was loaded");
 
   StartMoving(robotAddr);
 
@@ -183,12 +183,12 @@ bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & routePoi
       MobileRobotsKeynodes::rrel_end_point);
   if (it5->Next())
   {
-    SC_LOG_INFO("EndPoint");
+    SC_LOG_INFO("$$$$EndPoint");
     return true;
   }
   else
   {
-    SC_LOG_INFO("not EndPoint");
+    SC_LOG_INFO("$$$$not EndPoint");
     return false;
   }
 }
@@ -203,19 +203,19 @@ bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & routePoi
       MobileRobotsKeynodes::rrel_start_point);
   if (it5->Next())
   {
-    SC_LOG_INFO("StartPoint");
+    SC_LOG_INFO("$$$$StartPoint");
     return true;
   }
   else
   {
-    SC_LOG_INFO("not StartPoint");
+    SC_LOG_INFO("$$$$not StartPoint");
     return false;
   }
 }
 
 void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point)
 {
-  SC_LOG_INFO("Move to next point " + m_context.GetElementSystemIdentifier(robotAddr));
+  SC_LOG_INFO("$$$$Move to next point " + m_context.GetElementSystemIdentifier(robotAddr));
   ScAddr current_point;
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       robotAddr,
@@ -247,6 +247,7 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
 
 void MobileRobotInterpretationAgent::StartMoving(ScAddr const & robotAddr)
 {
+  SC_LOG_INFO("$$$$ robot start move");
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_is_moving, robotAddr);
   
   // добавление скорости
@@ -276,7 +277,7 @@ bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint)
         m_context.CreateIterator3(MobileRobotsKeynodes::concept_obstacle, ScType::ConstPermPosArc, obstacleAddr);
     if (it3->Next())
     {
-      SC_LOG_INFO("Obstacle");
+      SC_LOG_INFO("$$$$Obstacle");
       return true;
     }
   }
