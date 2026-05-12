@@ -99,7 +99,7 @@ TEST_F(TransportModuleTest, RandomObstacleGenerationAgentCreatesObstacle)
       obstacleAddr,
       ScType::ConstCommonArc,
       ScType::ConstNode,
-      ScType::ConstPermPosArc,
+      ScType::ConstActualTempPosArc,
       MobileRobotsKeynodes::nrel_obstacle_position);
 
   EXPECT_TRUE(obstaclePositionIt5->Next());

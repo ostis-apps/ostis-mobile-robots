@@ -98,7 +98,7 @@ ScAddr RandomObstacleGenerationAgent::GenerateObstacle(ScMemoryContext & context
       obstacleAddr,
       obstaclePositionAddr);
   context.GenerateConnector(
-      ScType::ConstPermPosArc,
+      ScType::ConstActualTempPosArc,
       MobileRobotsKeynodes::nrel_obstacle_position,
       obstaclePositionArc);
 
