@@ -10,13 +10,13 @@ TEST_F(TransportModuleTest, CallMobileRobotAnalyzerAgent)
     ScsLoader loader;
     
     // Загружаем тестовую структуру
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_analyzer.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "analyzer_test.scs");
     
     // Подписываем агентов 
     SubscribeAgents(context);
     
     // Загружаем начальные состояния робота
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_analyzer_initial_states.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "analyzer_test_initial_states.scs");
     
     // Ждём завершения 
     WaitAgents(context);
