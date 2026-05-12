@@ -14,6 +14,10 @@
     ..point7 => nrel_next_point: ..pointA;;
 *];;
 @route_example_1 <- concept_route;;
+@route_example_1 => nrel_min_load_time: [1];;
+@route_example_1 => nrel_max_load_time: [1];;
+@route_example_1 => nrel_min_unload_time: [1];;
+@route_example_1 => nrel_max_unload_time: [1];;
 
 // коробки
 ..box1
@@ -27,4 +31,4 @@ nrel_location ~> (..box2 => ..pointA);;
 // роботы
 robot1
 <- concept_mobile_robot;;
-nrel_location ~> (robot1 => ..pointA);;
+nrel_location ~> (robot1 => ..point7);;

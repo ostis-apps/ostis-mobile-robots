@@ -45,22 +45,24 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & act
 {
   SC_LOG_INFO("InterpreterStateLaunched");
    ScIterator5Ptr it5_1 = m_context.CreateIterator5(
-        robotAddr,
-        ScType::ConstCommonArc,
         ScType::ConstNode,
+        ScType::ConstCommonArc,
+        robotAddr,
         ScType::ConstActualTempPosArc,
         MobileRobotsKeynodes::nrel_location);
     while (it5_1->Next())
     {
-      ScAddr const & boxAddr = it5_1->Get(2);
+      ScAddr const & boxAddr = it5_1->Get(0);
       ScIterator3Ptr it3 =
           m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ConstPermPosArc, boxAddr);
       if (it3->Next()){
-        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_ready_being_unloaded, robotAddr);
+        SC_LOG_INFO("INITIALLY THERE IS ONE BOX ON ROBOT");
+        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
         break;
       }
       else{
-        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
+        SC_LOG_INFO("INITIALLY THERE IS NO BOX ON ROBOT");
+        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
         break;
       }
     }
@@ -189,12 +191,12 @@ void MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, b
   }
 }
 
-bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & next_point)
+bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & routePoint)
 {
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNodeStructure,
       ScType::ConstPermPosArc,
-      next_point,
+      routePoint,
       ScType::ConstPermPosArc,
       MobileRobotsKeynodes::rrel_end_point);
   if (it5->Next())
@@ -209,12 +211,12 @@ bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & next_poi
   }
 }
 
-bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & next_point)
+bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & routePoint)
 {
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNodeStructure,
       ScType::ConstPermPosArc,
-      next_point,
+      routePoint,
       ScType::ConstPermPosArc,
       MobileRobotsKeynodes::rrel_start_point);
   if (it5->Next())
@@ -231,7 +233,7 @@ bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & next_poi
 
 void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point)
 {
-  SC_LOG_INFO("Move to next point " + m_context.GetElementSystemIdentifier(robotAddr));
+  SC_LOG_INFO("Move to next point " + m_context.GetElementSystemIdentifier(robotAddr) + " " + m_context.GetElementSystemIdentifier(next_point));
   ScAddr current_point;
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       robotAddr, ScType::ConstCommonArc, ScType::ConstNode, ScType::ConstActualTempPosArc, MobileRobotsKeynodes::nrel_location);
@@ -292,12 +294,12 @@ void MobileRobotInterpretationAgent::StopMoving(ScAddr const & robotAddr)
   SetSpeed(robotAddr, 0);
 }
 
-bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & next_point)
+bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint)
 {
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNode,
       ScType::ConstCommonArc,
-      next_point,
+      routePoint,
       ScType::ConstPermPosArc,
       MobileRobotsKeynodes::nrel_obstacle_position);
   if (it5->Next())
@@ -365,6 +367,10 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateStopped(ScAction & acti
 ScResult MobileRobotInterpretationAgent::DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action)
 {
   ScAddr const & robotAddr = event.GetArcTargetElement();
+  if (m_context.CheckConnector(MobileRobotsKeynodes::concept_stopped, robotAddr, ScType::ConstActualTempPosArc))
+    SC_LOG_INFO(m_context.GetElementSystemIdentifier(robotAddr) + " stopped");
+    return action.FinishSuccessfully();
+
   return m_interpreterCallback(action, robotAddr);
 }
 
