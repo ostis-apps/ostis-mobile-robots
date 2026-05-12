@@ -168,29 +168,9 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
 void MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, bool state)
 {
   if (state)
-  {
-    ScIterator3Ptr it3 =
-        m_context.CreateIterator3(MobileRobotsKeynodes::concept_waiting_obstacle, ScType::ActualTempNegArc, robotAddr);
-    if (it3->Next())
-    {
-      // удаление дуги
-      m_context.EraseElement(it3->Get(1));
-    }
-    // создание новой дуги
-    m_context.GenerateConnector(ScType::ActualTempPosArc, MobileRobotsKeynodes::concept_waiting_obstacle, robotAddr);
-  }
+    ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_waiting_obstacle, robotAddr);
   else
-  {
-    ScIterator3Ptr it3 =
-        m_context.CreateIterator3(MobileRobotsKeynodes::concept_waiting_obstacle, ScType::ActualTempPosArc, robotAddr);
-    if (it3->Next())
-    {
-      // удаление дуги
-      m_context.EraseElement(it3->Get(1));
-    }
-    // создание новой дуги
-    m_context.GenerateConnector(ScType::ActualTempNegArc, MobileRobotsKeynodes::concept_waiting_obstacle, robotAddr);
-  }
+    ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_waiting_obstacle, robotAddr);
 }
 
 bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & routePoint)
@@ -288,7 +268,7 @@ bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint)
       ScType::ConstNode,
       ScType::ConstCommonArc,
       routePoint,
-      ScType::ConstPermPosArc,
+      ScType::ConstActualTempPosArc,
       MobileRobotsKeynodes::nrel_obstacle_position);
   if (it5->Next())
   {
@@ -297,6 +277,7 @@ bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint)
         m_context.CreateIterator3(MobileRobotsKeynodes::concept_obstacle, ScType::ConstPermPosArc, obstacleAddr);
     if (it3->Next())
     {
+      SC_LOG_INFO("Obstacle");
       return true;
     }
   }

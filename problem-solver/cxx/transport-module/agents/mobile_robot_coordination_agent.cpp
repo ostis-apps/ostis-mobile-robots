@@ -310,6 +310,6 @@ double MobileRobotCoordinationAgent::GetUnloadTime(ScAddr const & routeAddr)
 
 double MobileRobotCoordinationAgent::GenerateTime(int const & min, int const & max)
 {
-  std::uniform_int_distribution<double> timeDistribution(min, max);
+  std::uniform_int_distribution<int> timeDistribution(min, max);
   return timeDistribution(m_randomGenerator);
 }
