@@ -1,0 +1,25 @@
+// маршрут
+@route_test = [*
+    -> rrel_start_point: pointA;;
+    -> rrel_end_point: pointB;;
+    pointA => nrel_next_point: pointB;;
+*];;
+@route_test <- concept_route;;
+
+// времена загрузки/разгрузки
+@route_test => nrel_min_load_time: [2];;
+@route_test => nrel_max_load_time: [3];;
+@route_test => nrel_min_unload_time: [1];;
+@route_test => nrel_max_unload_time: [2];;
+
+// коробки
+box1 <- concept_box;;
+nrel_location ~> (box1 => pointA);;
+
+// точки
+pointA <- concept_point;;
+pointB <- concept_point;;
+
+// робот
+robot1 <- concept_mobile_robot;;
+nrel_location ~> (robot1 => pointA);;
