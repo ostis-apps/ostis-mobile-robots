@@ -130,12 +130,13 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateStopped(ScAction & action, Sc
       m_context.CreateIterator3(MobileRobotsKeynodes::concept_mobile_robot, ScType::ConstPermPosArc, ScType::ConstNode);
   while (it3->Next()){
     ScAddr robotAddr = it3->Get(2);
-    if (m_context.CheckConnector(MobileRobotsKeynodes::concept_launched, robotAddr, ScType::ConstActualTempArc)){
+    if (m_context.CheckConnector(MobileRobotsKeynodes::concept_launched, robotAddr, ScType::ConstActualTempPosArc)){
       other_is_launched = true;
       break;
     }
   }
-  // if(!other_is_launched)
+  if(!other_is_launched)
+    LogTotalStats();
   
 
   return action.FinishSuccessfully();
