@@ -6,14 +6,13 @@ TEST_F(TransportModuleTest, CallMobileRobotCoordinationAgent2)
   {
     ScAgentContext context;
     ScsLoader loader;
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_2.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coordination_agent_test_2.scs");
 
-    SubscribeAgents(context);
+    SubscribeInterCoordAgents(context);
 
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "example_2_robots_initial_states.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coordination_agent_test_2_initial_states.scs");
 
-    sleep(15);
-    // переписать на ожидание событий остановки всех роботов
+    WaitAgents(context);
 
     UnsubscribeAgents(context);
   }
