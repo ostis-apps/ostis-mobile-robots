@@ -15,10 +15,10 @@
     ..storage => nrel_next_point: ..pointA;;
 *];;
 @route_example_1 <- concept_route;;
-@route_example_1 => nrel_min_load_time: [1];;
-@route_example_1 => nrel_max_load_time: [1];;
-@route_example_1 => nrel_min_unload_time: [1];;
-@route_example_1 => nrel_max_unload_time: [1];;
+@route_example_1 => nrel_min_load_time: [4];;
+@route_example_1 => nrel_max_load_time: [4];;
+@route_example_1 => nrel_min_unload_time: [5];;
+@route_example_1 => nrel_max_unload_time: [5];;
 
 // роботы
 robot1
