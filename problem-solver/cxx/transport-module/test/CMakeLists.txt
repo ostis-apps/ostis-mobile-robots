@@ -13,7 +13,11 @@ target_include_directories(transport-module-tests
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/units
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
-gtest_discover_tests(transport-module-tests WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/units)
+gtest_discover_tests(
+    transport-module-tests
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/units
+    DISCOVERY_TIMEOUT 30
+)
 
 if(${SC_CLANG_FORMAT_CODE})
     target_clangformat_setup(transport-module-tests)

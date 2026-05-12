@@ -46,5 +46,5 @@ private:
 
   void ChangeActualTempArcToPos(ScAddr const & addr1, ScAddr const & addr2);
   void ChangeActualTempArcToNeg(ScAddr const & addr1, ScAddr const & addr2);
-
+  bool IsStopped(ScAddr const & robotAddr);
 };

@@ -1,8 +1,0 @@
-// роботы
-robot1
-<~ concept_launched;
-<|~ concept_stopped;
-<|~ concept_box_loaded;
-<~ concept_box_unloaded;
-<|~ concept_ready_being_loaded;
-<|~ concept_ready_being_unloaded;;

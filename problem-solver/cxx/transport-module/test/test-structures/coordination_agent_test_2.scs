@@ -19,16 +19,24 @@
 @route_example_1 => nrel_min_unload_time: [1];;
 @route_example_1 => nrel_max_unload_time: [1];;
 
+// роботы
+robot1
+<- concept_mobile_robot;;
+<<<<<<<< HEAD:problem-solver/cxx/transport-module/test/test-structures/example_5.scs
+nrel_location ~> (robot1 => ..pointA);;
+========
+nrel_location ~> (robot1 => ..point7);;
+>>>>>>>> origin/volkovich:problem-solver/cxx/transport-module/test/test-structures/coordination_agent_test_2.scs
+
 // коробки
 ..box1
 <- concept_box;;
-nrel_location ~> (..box1 => ..pointA);;
+<<<<<<<< HEAD:problem-solver/cxx/transport-module/test/test-structures/example_5.scs
+nrel_location ~> (..box1 => robot1);;
 
 ..box2
 <- concept_box;;
 nrel_location ~> (..box2 => ..pointA);;
-
-// роботы
-robot1
-<- concept_mobile_robot;;
-nrel_location ~> (robot1 => ..point7);;
+========
+nrel_location ~> (..box1 => ..pointA);;
+>>>>>>>> origin/volkovich:problem-solver/cxx/transport-module/test/test-structures/coordination_agent_test_2.scs

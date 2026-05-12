@@ -27,11 +27,14 @@ void TransportModule::Initialize(ScMemoryContext * _)
     context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
     // context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
-  // context.SubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
+
+  m_randomObstacleGenerationAgent.Start();
 }
 
 void TransportModule::Shutdown(ScMemoryContext * _)
 {
+  m_randomObstacleGenerationAgent.Stop();
+
   ScAgentContext context;
   ScIterator3Ptr const it3 =
       context.CreateIterator3(MobileRobotsKeynodes::concept_mobile_robot, ScType::ConstPermPosArc, ScType::ConstNode);
@@ -42,5 +45,4 @@ void TransportModule::Shutdown(ScMemoryContext * _)
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
     // context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
-  // context.UnsubscribeAgent<RandomObstacleGenerationAgent>(MobileRobotsKeynodes::concept_simulation_time_tick);
 }

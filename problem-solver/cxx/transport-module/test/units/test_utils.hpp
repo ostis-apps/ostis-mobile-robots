@@ -13,3 +13,7 @@ std::string const EXAMPLE_MODULE_TEST_FILES_DIR_PATH = "../test-structures/";
 
 void SubscribeAgents(ScAgentContext & context);
 void UnsubscribeAgents(ScAgentContext & context);
+void SubscribeInterCoordAgents(ScAgentContext & context);
+void UnsubscribeInterCoordAgents(ScAgentContext & context);
+void WaitAgents(ScAgentContext & context);
+void DeleteObstacle(ScAgentContext & context);

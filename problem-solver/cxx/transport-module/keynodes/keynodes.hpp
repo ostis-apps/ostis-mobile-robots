@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sc-memory/sc_agent.hpp>
 #include <sc-memory/sc_keynodes.hpp>
 
 using InterpreterCallback = std::function<ScResult(ScAction & action, ScAddr const &)>;
@@ -29,7 +30,7 @@ public:
   static inline ScKeynode const concept_ready_being_loaded{"concept_ready_being_loaded", ScType::ConstNodeClass};
   static inline ScKeynode const concept_ready_being_unloaded{"concept_ready_being_unloaded", ScType::ConstNodeClass};
 
-  static inline ScKeynode const concept_is_moving{"concept_is_mooving", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_is_moving{"concept_is_moving", ScType::ConstNodeClass};
 
   static inline ScKeynode const concept_loading_process{"concept_loading_process", ScType::ConstNodeClass};
   static inline ScKeynode const concept_unloading_process{"concept_unloading_process", ScType::ConstNodeClass};
