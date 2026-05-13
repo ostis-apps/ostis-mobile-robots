@@ -36,6 +36,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
   SC_LOG_INFO("Start InterpreterStateReadyBeingLoaded");
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
+  ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_not_loading, robotAddr);
 
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       robotAddr,
@@ -84,6 +85,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
           ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
           ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
           ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_loading, robotAddr);
+          ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_not_loading, robotAddr);
 
           box_is_founded = true;
           SC_LOG_INFO("Finish InterpreterStateReadyBeingLoaded");
@@ -166,6 +168,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScActi
 
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_ready_being_unloaded, robotAddr);
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
+  ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_not_unloading, robotAddr);
 
   it5 = m_context.CreateIterator5(
       ScType::ConstNode,
@@ -200,18 +203,20 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScActi
         m_context.GenerateConnector(ScType::ConstActualTempPosArc, MobileRobotsKeynodes::nrel_location, arcAddr);
 
         ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_unloading, robotAddr);
+        ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_not_unloading, robotAddr);
+
         ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
 
         if (!keep_working)
         {
-          ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_stopped, robotAddr);
           ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_launched, robotAddr);
+          ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_stopped, robotAddr);
+          return action.FinishSuccessfully();
         }
-
+        
         ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
 
         SC_LOG_INFO("Finish InterpreterStateReadyBeingUnloaded");
-        return action.FinishSuccessfully();
       }
     }
   }

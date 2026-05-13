@@ -12,14 +12,14 @@ TEST_F(TransportModuleTest, CallMobileRobotInterpretationAgent1)
     ScsLoader loader;
     loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "interpretation_agent_test_1.scs");
 
-    SubscribeInterCoordAgents(context);
+    SubscribeAgents(context);
 
     loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "interpretation_agent_test_1_initial_states.scs");
 
     RandomObstacleGenerationAgent obstacleGenerator;
     obstacleGenerator.GenerateObstacle(context);
 
-    sleep(6);
+    sleep(10);
 
     DeleteObstacle(context);
 

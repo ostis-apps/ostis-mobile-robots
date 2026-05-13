@@ -9,7 +9,7 @@ void SubscribeAgents(ScAgentContext & context)
     ScAddr const & robotAddr = it3->Get(2);
     context.SubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.SubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
-    context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);  // ← АНАЛИЗАТОР ПОДПИСАН
+    context.SubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
 }
 
@@ -22,7 +22,7 @@ void UnsubscribeAgents(ScAgentContext & context)
     ScAddr const & robotAddr = it3->Get(2);
     context.UnsubscribeAgent<MobileRobotCoordinationAgent>(robotAddr);
     context.UnsubscribeAgent<MobileRobotInterpretationAgent>(robotAddr);
-    context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);  // ← АНАЛИЗАТОР ОТПИСАН
+    context.UnsubscribeAgent<MobileRobotAnalyzerAgent>(robotAddr);
   }
 }
 
