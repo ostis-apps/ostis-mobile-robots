@@ -1,47 +1,34 @@
-concept_mobile_robot <- sc_node_class;;
-concept_box <- sc_node_class;;
-concept_route <- sc_node_struct;; 
+// Короткий кольцевой маршрут
+@route_beta = [*
+    -> rrel_start_point: ..loc1;;
+    -> rrel_end_point: ..loc3;;
 
-concept_launched <- sc_node_class;;
-concept_stopped <- sc_node_class;;
-
-concept_robot_is_loading <- sc_node_class;;
-concept_robot_is_not_loading <- sc_node_class;;
-
-concept_robot_is_unloading <- sc_node_class;;
-concept_robot_is_not_unloading <- sc_node_class;;
-
-concept_robot_is_waiting <- sc_node_class;;
-concept_robot_is_not_waiting <- sc_node_class;;
-
-nrel_location <- sc_node_non_role_relation;;
-nrel_next_point <- sc_node_non_role_relation;;
-nrel_min_load_time <- sc_node_non_role_relation;;
-nrel_max_load_time <- sc_node_non_role_relation;;
-nrel_min_unload_time <- sc_node_non_role_relation;;
-nrel_max_unload_time <- sc_node_non_role_relation;;
-
-rrel_start_point <- sc_node_role_relation;;
-rrel_end_point <- sc_node_role_relation;;
-
-route_complex <- concept_route;
-    => nrel_min_load_time: [1];
-    => nrel_max_load_time: [1];
-    => nrel_min_unload_time: [1];
-    => nrel_max_unload_time: [1];;
-
-route_complex = [*
-    -> rrel_start_point: pointA;;
-    -> rrel_end_point: pointB;;
-
-    pointA => nrel_next_point: point1;;
-    point1 => nrel_next_point: point2;;
-    point2 => nrel_next_point: pointB;;
-    pointB => nrel_next_point: pointA;;
+    ..loc1 => nrel_next_point: ..loc2;;
+    ..loc2 => nrel_next_point: ..loc3;;
+    ..loc3 => nrel_next_point: ..loc1;;
+    ..base => nrel_next_point: ..loc1;;
 *];;
 
-robot_complex <- concept_mobile_robot;;
-robot_complex => nrel_location: point2;;
+@route_beta <- concept_route;;
+@route_beta => nrel_min_load_time: [2];;
+@route_beta => nrel_max_load_time: [4];;
+@route_beta => nrel_min_unload_time: [1];;
+@route_beta => nrel_max_unload_time: [3];;
 
-box_complex <- concept_box;;
-box_complex => nrel_location: pointA;;
+// Три коробки в первой точке
+..pkgA <- concept_box;; 
+nrel_location ~> (..pkgA => ..loc1);;
+
+..pkgB <- concept_box;; 
+nrel_location ~> (..pkgB => ..loc1);;
+
+..pkgC <- concept_box;; 
+nrel_location ~> (..pkgC => ..loc1);;
+
+// Робот "
+robot_alpha
+<- concept_mobile_robot;;
+
+nrel_location ~> (robot_alpha => ..base);;
+
+robot_alpha => nrel_current_route: @route_beta;;
