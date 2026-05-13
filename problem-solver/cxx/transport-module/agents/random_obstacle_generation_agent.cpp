@@ -24,10 +24,13 @@ void RandomObstacleGenerationAgent::Stop()
     m_worker.join();
 }
 
+//пока генератор включён, каждую секунду выполнять один шаг генерации препятствий.
 void RandomObstacleGenerationAgent::WorkerLoop()
 {
+  //создать инструмент для работы с базой знаний.
   ScMemoryContext context;
 
+  //Это флаг: работает генератор или нет.
   while (m_isRunning)
   {
     GenerateStep(context);
@@ -35,6 +38,7 @@ void RandomObstacleGenerationAgent::WorkerLoop()
   }
 }
 
+//каждый шаг генератора: увеличить время, удалить просроченные препятствия, и если пора — создать новое препятствие.
 void RandomObstacleGenerationAgent::GenerateStep(ScMemoryContext & context)
 {
   ++m_currentTick;
@@ -44,6 +48,7 @@ void RandomObstacleGenerationAgent::GenerateStep(ScMemoryContext & context)
     GenerateObstacle(context);
 }
 
+//надо ли сейчас вызывать препятствие T or F
 bool RandomObstacleGenerationAgent::ShouldGenerateObstacle()
 {
   ++m_ticksSinceLastObstacle;
@@ -58,6 +63,7 @@ bool RandomObstacleGenerationAgent::ShouldGenerateObstacle()
   return probabilityDistribution(m_randomGenerator) < ObstacleProbability;
 }
 
+//Эта функция удаляет препятствия, у которых закончился срок жизни.
 void RandomObstacleGenerationAgent::RemoveExpiredObstacles(ScMemoryContext & context)
 {
   for (auto it = m_obstacleExpirationTicks.begin(); it != m_obstacleExpirationTicks.end();)
@@ -74,12 +80,14 @@ void RandomObstacleGenerationAgent::RemoveExpiredObstacles(ScMemoryContext & con
   }
 }
 
+//если препятствие существует, удалить его из базы знаний.
 void RandomObstacleGenerationAgent::RemoveObstacle(ScMemoryContext & context, ScAddr const & obstacleAddr)
 {
   if (obstacleAddr.IsValid() && context.IsElement(obstacleAddr))
     context.EraseElement(obstacleAddr);
 }
 
+//главная функция, которая создаёт препятствие в базе знаний.
 ScAddr RandomObstacleGenerationAgent::GenerateObstacle(ScMemoryContext & context)
 {
   ScAddr const obstaclePositionAddr = SelectObstaclePosition(context);
