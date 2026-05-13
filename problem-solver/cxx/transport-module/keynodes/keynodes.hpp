@@ -20,9 +20,13 @@ public:
   static inline ScKeynode const concept_stopped{"concept_stopped", ScType::ConstNodeClass};
 
   static inline ScKeynode const concept_robot_is_loading{"concept_robot_is_loading", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_robot_is_not_loading{"concept_robot_is_not_loading", ScType::ConstNodeClass};
+
   static inline ScKeynode const concept_robot_is_unloading{"concept_robot_is_unloading", ScType::ConstNodeClass};
-  static inline ScKeynode const concept_robot_waiting{"concept_robot_waiting", ScType::ConstNodeClass};
-  static inline ScKeynode const concept_robot_not_waiting{"concept_robot_not_waiting", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_robot_is_not_unloading{"concept_robot_is_not_unloading", ScType::ConstNodeClass};
+
+  static inline ScKeynode const concept_robot_is_waiting{"concept_robot_is_waiting", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_robot_is_not_waiting{"concept_robot_is_not_waiting", ScType::ConstNodeClass};
 
   static inline ScKeynode const concept_box_loaded{"concept_box_loaded", ScType::ConstNodeClass};
   static inline ScKeynode const concept_box_unloaded{"concept_box_unloaded", ScType::ConstNodeClass};
@@ -31,6 +35,7 @@ public:
   static inline ScKeynode const concept_ready_being_unloaded{"concept_ready_being_unloaded", ScType::ConstNodeClass};
 
   static inline ScKeynode const concept_is_moving{"concept_is_moving", ScType::ConstNodeClass};
+  static inline ScKeynode const concept_is_not_moving{"concept_is_not_moving", ScType::ConstNodeClass};
 
   static inline ScKeynode const concept_loading_process{"concept_loading_process", ScType::ConstNodeClass};
   static inline ScKeynode const concept_unloading_process{"concept_unloading_process", ScType::ConstNodeClass};
@@ -64,5 +69,3 @@ public:
 };
 
 // Подробнее о ключевых элементах тут: https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/keynodes/
-
-// добавить противоположные

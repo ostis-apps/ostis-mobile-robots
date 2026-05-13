@@ -1,5 +1,9 @@
 #include "test_utils.hpp"
 
+#define private public
+#include <agents/random_obstacle_generation_agent.hpp>
+#undef private
+
 TEST_F(TransportModuleTest, CallMobileRobotInterpretationAgent1)
 {
   try
@@ -8,11 +12,14 @@ TEST_F(TransportModuleTest, CallMobileRobotInterpretationAgent1)
     ScsLoader loader;
     loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "interpretation_agent_test_1.scs");
 
-    SubscribeInterCoordAgents(context);
+    SubscribeAgents(context);
 
     loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "interpretation_agent_test_1_initial_states.scs");
 
-    sleep(6);
+    RandomObstacleGenerationAgent obstacleGenerator;
+    obstacleGenerator.GenerateObstacle(context);
+
+    sleep(10);
 
     DeleteObstacle(context);
 

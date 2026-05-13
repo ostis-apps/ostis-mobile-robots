@@ -129,7 +129,6 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
     {
       StopMoving(robotAddr);
 
-      //  добавление состояния "ожидание"
       SetWaitingState(robotAddr, true);
 
       while (ObstacleCheck(next_point))
@@ -138,7 +137,6 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
         continue;
       }
 
-      //  удаление состояния "ожидание"
       SetWaitingState(robotAddr, false);
 
       StartMoving(robotAddr);
@@ -167,10 +165,14 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
 
 void MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, bool state)
 {
-  if (state)
-    ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_waiting_obstacle, robotAddr);
-  else
-    ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_waiting_obstacle, robotAddr);
+  if (state){
+    ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_not_waiting, robotAddr);
+    ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_waiting, robotAddr);
+  }
+  else{
+    ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_waiting, robotAddr);
+    ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_not_waiting, robotAddr);
+  }
 }
 
 bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & routePoint)
@@ -249,15 +251,15 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
 void MobileRobotInterpretationAgent::StartMoving(ScAddr const & robotAddr)
 {
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_is_moving, robotAddr);
-  
+  ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_is_not_moving, robotAddr);
   // добавление скорости
   SetSpeed(robotAddr, 1);
 }
 
 void MobileRobotInterpretationAgent::StopMoving(ScAddr const & robotAddr)
 {
+  ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_is_not_moving, robotAddr);
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_is_moving, robotAddr);
-
   //  удаление скорости
   // SetSpeed(robotAddr, 0);
 }

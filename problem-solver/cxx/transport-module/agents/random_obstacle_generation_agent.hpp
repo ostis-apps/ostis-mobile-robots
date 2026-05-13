@@ -46,11 +46,11 @@ private:
   int GenerateObstacleLifetime();
 
 private:
-  static constexpr double ObstacleProbability = 0.7;
-  static constexpr int MinObstacleInterval = 3;
-  static constexpr int MaxObstacleInterval = 8;
-  static constexpr int MinObstacleLifetime = 2;
-  static constexpr int MaxObstacleLifetime = 5;
+  static constexpr double ObstacleProbability = 1.0;
+  static constexpr int MinObstacleInterval = 1;
+  static constexpr int MaxObstacleInterval = 1;
+  static constexpr int MinObstacleLifetime = 8;
+  static constexpr int MaxObstacleLifetime = 12;
 
   std::atomic_bool m_isRunning = false;
   std::thread m_worker;
