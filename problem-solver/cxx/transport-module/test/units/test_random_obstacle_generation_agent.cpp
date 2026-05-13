@@ -15,66 +15,26 @@ namespace
 struct ObstacleGeneratorTestData
 {
   ScAddr robotAddr;
-  ScAddr routeAddr;
   ScAddr firstPointAddr;
   ScAddr secondPointAddr;
   ScAddr thirdPointAddr;
 };
 
-ScAddr AddNextPointRelation(ScMemoryContext & context, ScAddr const & routeAddr, ScAddr const & sourceAddr, ScAddr const & targetAddr)
+ObstacleGeneratorTestData LoadObstacleGeneratorTestData(ScMemoryContext & context)
 {
-  ScAddr const nextPointArcAddr = context.GenerateConnector(ScType::ConstCommonArc, sourceAddr, targetAddr);
-  context.GenerateConnector(ScType::ConstPermPosArc, MobileRobotsKeynodes::nrel_next_point, nextPointArcAddr);
-  context.GenerateConnector(ScType::ConstPermPosArc, routeAddr, nextPointArcAddr);
+  ScsLoader loader;
+  loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "obstacle_generation_agent_test.scs");
 
-  return nextPointArcAddr;
-}
-
-ObstacleGeneratorTestData GenerateActiveRobotRoute(ScMemoryContext & context)
-{
   ObstacleGeneratorTestData data;
+  data.robotAddr = context.SearchElementBySystemIdentifier("obstacle_generator_test_robot");
+  data.firstPointAddr = context.SearchElementBySystemIdentifier("obstacle_generator_test_point_1");
+  data.secondPointAddr = context.SearchElementBySystemIdentifier("obstacle_generator_test_point_2");
+  data.thirdPointAddr = context.SearchElementBySystemIdentifier("obstacle_generator_test_point_3");
 
-  data.robotAddr = context.GenerateNode(ScType::ConstNode);
-  data.routeAddr = context.GenerateNode(ScType::ConstNodeStructure);
-  data.firstPointAddr = context.GenerateNode(ScType::ConstNode);
-  data.secondPointAddr = context.GenerateNode(ScType::ConstNode);
-  data.thirdPointAddr = context.GenerateNode(ScType::ConstNode);
-
-  ScAddr const robotClassArcAddr =
-      context.GenerateConnector(ScType::ConstPermPosArc, MobileRobotsKeynodes::concept_mobile_robot, data.robotAddr);
-  EXPECT_TRUE(robotClassArcAddr.IsValid());
-
-  ScAddr const launchedArcAddr =
-      context.GenerateConnector(ScType::ConstActualTempPosArc, MobileRobotsKeynodes::concept_launched, data.robotAddr);
-  EXPECT_TRUE(launchedArcAddr.IsValid());
-
-  ScAddr const locationArcAddr = context.GenerateConnector(ScType::ConstCommonArc, data.robotAddr, data.firstPointAddr);
-  EXPECT_TRUE(locationArcAddr.IsValid());
-
-  ScAddr const locationRelationArcAddr =
-      context.GenerateConnector(ScType::ConstActualTempPosArc, MobileRobotsKeynodes::nrel_location, locationArcAddr);
-  EXPECT_TRUE(locationRelationArcAddr.IsValid());
-
-  EXPECT_TRUE(context.CreateIterator3(
-      MobileRobotsKeynodes::concept_launched,
-      ScType::ConstActualTempPosArc,
-      ScType::Node)->Next());
-  EXPECT_TRUE(context.CreateIterator5(
-      data.robotAddr,
-      ScType::ConstCommonArc,
-      ScType::Node,
-      ScType::ConstActualTempPosArc,
-      MobileRobotsKeynodes::nrel_location)->Next());
-
-  AddNextPointRelation(context, data.routeAddr, data.firstPointAddr, data.secondPointAddr);
-  AddNextPointRelation(context, data.routeAddr, data.secondPointAddr, data.thirdPointAddr);
-
-  EXPECT_TRUE(context.CreateIterator5(
-      ScType::Node,
-      ScType::ConstCommonArc,
-      ScType::Node,
-      ScType::ConstPermPosArc,
-      MobileRobotsKeynodes::nrel_next_point)->Next());
+  EXPECT_TRUE(data.robotAddr.IsValid());
+  EXPECT_TRUE(data.firstPointAddr.IsValid());
+  EXPECT_TRUE(data.secondPointAddr.IsValid());
+  EXPECT_TRUE(data.thirdPointAddr.IsValid());
 
   return data;
 }
@@ -84,7 +44,7 @@ ObstacleGeneratorTestData GenerateActiveRobotRoute(ScMemoryContext & context)
 TEST_F(TransportModuleTest, RandomObstacleGenerationAgentCreatesObstacle)
 {
   ScAgentContext context;
-  GenerateActiveRobotRoute(context);
+  LoadObstacleGeneratorTestData(context);
 
   RandomObstacleGenerationAgent agent;
   ScAddr const obstacleAddr = agent.GenerateObstacle(context);
@@ -108,7 +68,7 @@ TEST_F(TransportModuleTest, RandomObstacleGenerationAgentCreatesObstacle)
 TEST_F(TransportModuleTest, RandomObstacleGenerationAgentSelectsPositionFromActiveRobotRoute)
 {
   ScAgentContext context;
-  ObstacleGeneratorTestData const data = GenerateActiveRobotRoute(context);
+  ObstacleGeneratorTestData const data = LoadObstacleGeneratorTestData(context);
 
   RandomObstacleGenerationAgent agent;
   EXPECT_EQ(agent.GetRobotCurrentPosition(context, data.robotAddr), data.firstPointAddr);
@@ -124,7 +84,7 @@ TEST_F(TransportModuleTest, RandomObstacleGenerationAgentSelectsPositionFromActi
 TEST_F(TransportModuleTest, RandomObstacleGenerationAgentRemovesExpiredObstacle)
 {
   ScAgentContext context;
-  GenerateActiveRobotRoute(context);
+  LoadObstacleGeneratorTestData(context);
 
   RandomObstacleGenerationAgent agent;
   ScAddr const obstacleAddr = agent.GenerateObstacle(context);

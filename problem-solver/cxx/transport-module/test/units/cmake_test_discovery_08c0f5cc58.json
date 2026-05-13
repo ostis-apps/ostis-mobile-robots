@@ -39,17 +39,17 @@
         {
           "name": "RandomObstacleGenerationAgentCreatesObstacle",
           "file": "\/Users\/tatanasolovej\/ostis-mobile-robots\/problem-solver\/cxx\/transport-module\/test\/units\/test_random_obstacle_generation_agent.cpp",
-          "line": 84
+          "line": 44
         },
         {
           "name": "RandomObstacleGenerationAgentSelectsPositionFromActiveRobotRoute",
           "file": "\/Users\/tatanasolovej\/ostis-mobile-robots\/problem-solver\/cxx\/transport-module\/test\/units\/test_random_obstacle_generation_agent.cpp",
-          "line": 108
+          "line": 68
         },
         {
           "name": "RandomObstacleGenerationAgentRemovesExpiredObstacle",
           "file": "\/Users\/tatanasolovej\/ostis-mobile-robots\/problem-solver\/cxx\/transport-module\/test\/units\/test_random_obstacle_generation_agent.cpp",
-          "line": 124
+          "line": 84
         }
       ]
     }
