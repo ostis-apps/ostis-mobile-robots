@@ -37,6 +37,11 @@ public:
   static inline ScKeynode const concept_is_moving{"concept_is_moving", ScType::ConstNodeClass};
   static inline ScKeynode const concept_is_not_moving{"concept_is_not_moving", ScType::ConstNodeClass};
 
+  static inline ScKeynode const nrel_robot_max_speed{"nrel_robot_max_speed", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_robot_current_speed{"nrel_robot_current_speed", ScType::ConstNodeNonRole};
+
+  static inline ScKeynode const concept_distance{"concept_distance", ScType::ConstNodeSuperclass};
+
   static inline ScKeynode const concept_loading_process{"concept_loading_process", ScType::ConstNodeClass};
   static inline ScKeynode const concept_unloading_process{"concept_unloading_process", ScType::ConstNodeClass};
   static inline ScKeynode const concept_waiting_obstacle{"concept_waiting_obstacle", ScType::ConstNodeClass};
@@ -82,6 +87,8 @@ public:
 
   static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeStructure};
   static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};
+  
+  static inline ScKeynode const nrel_work_robot_group{"nrel_work_robot_group", ScType::ConstNodeNonRole};
 };
 
 // Подробнее о ключевых элементах тут: https://ostis-ai.github.io/sc-machine/sc-memory/api/cpp/extended/agents/keynodes/

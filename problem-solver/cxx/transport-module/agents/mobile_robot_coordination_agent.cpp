@@ -2,6 +2,9 @@
 #include <sc-memory/sc_link.hpp>
 #include <chrono>
 #include <thread>
+#include <mutex>
+
+std::mutex box_mutex;
 
 ScAddr MobileRobotCoordinationAgent::GetActionClass() const
 {
@@ -46,6 +49,8 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
       MobileRobotsKeynodes::nrel_location);
   if (it5->Next())
   {
+    std::unique_lock<std::mutex> lock(box_mutex);
+
     ScAddr const & routeStartPointAddr = it5->Get(2);
     ScIterator5Ptr it5_1 = m_context.CreateIterator5(
         ScType::ConstNode,
@@ -64,6 +69,8 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingLoaded(ScAction
         SC_LOG_INFO("Box is found at StartPoint");
         m_context.EraseElement(it5_1->Get(1));
 
+        lock.unlock();
+        
         ScIterator5Ptr it5_2 = m_context.CreateIterator5(
             ScType::ConstNodeStructure,
             ScType::ConstPermPosArc,
