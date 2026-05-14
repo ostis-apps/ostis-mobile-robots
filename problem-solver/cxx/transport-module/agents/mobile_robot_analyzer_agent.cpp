@@ -115,13 +115,13 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateStopped(ScAction & action, Sc
   experimentRunning = false;
   std::this_thread::sleep_for(std::chrono::seconds(1));
   RobotStats stats = robotStats[robotHash];
-  SC_LOG_INFO("====================================");
-  SC_LOG_INFO("--- Робот " + m_context.GetElementSystemIdentifier(robotAddr) + " ---");
-  SC_LOG_INFO("Ожидание: " + std::to_string(stats.waitingTime) + "с");
-  SC_LOG_INFO("Движение: " + std::to_string(stats.movingTime) + "с");
-  SC_LOG_INFO("Загрузка: " + std::to_string(stats.loadingTime) + "с");
-  SC_LOG_INFO("Разгрузка: " + std::to_string(stats.unloadingTime) + "с");
-  SC_LOG_INFO("====================================");
+  m_logger.Info("====================================");
+  m_logger.Info("--- Робот " + m_context.GetElementSystemIdentifier(robotAddr) + " ---");
+  m_logger.Info("  Ожидание: " + std::to_string(stats.waitingTime) + "с");
+  m_logger.Info("  Движение: " + std::to_string(stats.movingTime) + "с");
+  m_logger.Info("  Загрузка: " + std::to_string(stats.loadingTime) + "с");
+  m_logger.Info("  Разгрузка: " + std::to_string(stats.unloadingTime) + "с");
+  m_logger.Info("====================================");
   stateStartTimes.erase(robotHash);
   robotStats.erase(robotHash);
 
@@ -181,7 +181,6 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateIsNotWaiting(ScAction & actio
   size_t classHash = MobileRobotsKeynodes::concept_robot_is_waiting.Hash();
   double seconds = CalculateDiffInSeconds(robotHash, classHash);
   robotStats[robotHash].waitingTime += seconds;
-  totalWaitingTime += seconds;
   return action.FinishSuccessfully();
 }
 
@@ -200,7 +199,6 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateIsNotLoading(ScAction & actio
   size_t classHash = MobileRobotsKeynodes::concept_robot_is_loading.Hash();
   double seconds = CalculateDiffInSeconds(robotHash, classHash);
   robotStats[robotHash].loadingTime += seconds;
-  totalLoadUnloadTime += seconds;
   return action.FinishSuccessfully();
 }
 
@@ -219,7 +217,6 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateIsNotUnloading(ScAction & act
   size_t classHash = MobileRobotsKeynodes::concept_robot_is_unloading.Hash();
   double seconds = CalculateDiffInSeconds(robotHash, classHash);
   robotStats[robotHash].unloadingTime += seconds;
-  totalLoadUnloadTime += seconds;
   return action.FinishSuccessfully();
 }
 

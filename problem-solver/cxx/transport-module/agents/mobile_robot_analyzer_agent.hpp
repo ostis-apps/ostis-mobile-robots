@@ -26,5 +26,4 @@ public:
 private:
   InterpreterCallback m_interpreterCallback;
   double CalculateDiffInSeconds(size_t const & robotHash, size_t const & classHash);
-  void LogTotalStats();
 };

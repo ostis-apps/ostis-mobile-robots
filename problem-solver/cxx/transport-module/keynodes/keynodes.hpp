@@ -57,25 +57,9 @@ public:
       "nrel_total_obstacle_wait_time",
       ScType::ConstNodeNonRole};
 
-  static inline ScKeynode const action_generate_random_obstacle{
-      "action_generate_random_obstacle",
-      ScType::ConstNodeClass};
-
-  static inline ScKeynode const concept_simulation_time_tick{"concept_simulation_time_tick", ScType::ConstNodeClass};
   static inline ScKeynode const concept_obstacle{"concept_obstacle", ScType::ConstNodeClass};
-  static inline ScKeynode const concept_obstacle_generation_parameters{
-      "concept_obstacle_generation_parameters",
-      ScType::ConstNodeClass};
 
   static inline ScKeynode const nrel_obstacle_position{"nrel_obstacle_position", ScType::ConstNodeNonRole};
-  static inline ScKeynode const nrel_obstacle_lifetime{"nrel_obstacle_lifetime", ScType::ConstNodeNonRole};
-  static inline ScKeynode const nrel_obstacle_intensity{"nrel_obstacle_intensity", ScType::ConstNodeNonRole};
-  static inline ScKeynode const nrel_min_obstacle_interval{"nrel_min_obstacle_interval", ScType::ConstNodeNonRole};
-  static inline ScKeynode const nrel_max_obstacle_interval{"nrel_max_obstacle_interval", ScType::ConstNodeNonRole};
-  static inline ScKeynode const nrel_min_obstacle_lifetime{"nrel_min_obstacle_lifetime", ScType::ConstNodeNonRole};
-  static inline ScKeynode const nrel_max_obstacle_lifetime{"nrel_max_obstacle_lifetime", ScType::ConstNodeNonRole};
-
-  static inline ScKeynode const obstacle_generation_parameters{"obstacle_generation_parameters", ScType::ConstNode};
 
   static inline ScKeynode const rrel_start_point{"rrel_start_point", ScType::ConstNodeRole};
   static inline ScKeynode const rrel_end_point{"rrel_end_point", ScType::ConstNodeRole};

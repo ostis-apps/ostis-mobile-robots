@@ -1,3 +1,9 @@
+concept_obstacle
+<- sc_node_class;;
+
+nrel_obstacle_position
+<- sc_node_norole_relation;;
+
 // маршрут
 @route_example_1 = [*
     -> rrel_start_point: ..pointA;;
