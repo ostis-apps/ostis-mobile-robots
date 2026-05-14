@@ -2,6 +2,7 @@
 #include <time.h>
 #include <thread>  // для std::this_thread::sleep_for
 #include <chrono>  // для std::chrono::milliseconds
+#include <mutex>
 
 ScAddr MobileRobotInterpretationAgent::GetActionClass() const
 {
@@ -165,11 +166,13 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
 
 void MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, bool state)
 {
-  if (state){
+  if (state)
+  {
     ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_not_waiting, robotAddr);
     ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_waiting, robotAddr);
   }
-  else{
+  else
+  {
     ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_robot_is_waiting, robotAddr);
     ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_robot_is_not_waiting, robotAddr);
   }
@@ -218,7 +221,7 @@ bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & routePoi
 void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point)
 {
   SC_LOG_INFO("Move to next point " + m_context.GetElementSystemIdentifier(robotAddr));
-  ScAddr current_point;
+  ScAddr currentRoutePointAddr;
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       robotAddr,
       ScType::ConstCommonArc,
@@ -227,6 +230,7 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
       MobileRobotsKeynodes::nrel_location);
   if (it5->Next())
   {
+    currentRoutePointAddr = it5->Get(2);
     m_context.EraseElement(it5->Get(1));
   }
   ScAddr const & arc = m_context.GenerateConnector(ScType::ConstCommonArc, robotAddr, next_point);
@@ -242,8 +246,10 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
   //   double speed = speedNode.GetLinkContent();
   // }
 
-  double speed = 20;
-  double distance = 20;
+  double speed = GetCurrentSpeed(robotAddr);
+  SC_LOG_INFO("Скорость " + std::to_string(speed));
+  double distance = GetDistanceToNextPoint(currentRoutePointAddr);
+  SC_LOG_INFO(std::to_string(distance));
   double time = distance / speed;
   std::this_thread::sleep_for(std::chrono::duration<double>(time));
 }
@@ -252,16 +258,77 @@ void MobileRobotInterpretationAgent::StartMoving(ScAddr const & robotAddr)
 {
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_is_moving, robotAddr);
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_is_not_moving, robotAddr);
-  // добавление скорости
-  SetSpeed(robotAddr, 1);
+
+  double speed = GetMaxSpeed(robotAddr);
+
+  SetCurrentSpeed(robotAddr, speed);
+}
+
+double MobileRobotInterpretationAgent::GetMaxSpeed(ScAddr const & robotAddr)
+{
+  double speed = 20;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+      robotAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNodeLink,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_robot_max_speed);
+  if (it5->Next())
+  {
+    ScAddr speedAddr = it5->Get(2);
+    m_context.GetLinkContent(speedAddr, speed);
+  }
+  return speed;
+}
+
+double MobileRobotInterpretationAgent::GetCurrentSpeed(ScAddr const & robotAddr)
+{
+  double speed = 20;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+      robotAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNodeLink,
+      ScType::ConstActualTempPosArc,
+      MobileRobotsKeynodes::nrel_robot_current_speed);
+  if (it5->Next())
+  {
+    ScAddr const &speedAddr = it5->Get(2);
+    SC_LOG_INFO(m_context.GetElementSystemIdentifier(speedAddr));
+    m_context.GetLinkContent(speedAddr, speed);
+  }
+  return speed;
+}
+
+double MobileRobotInterpretationAgent::GetDistanceToNextPoint(ScAddr const & routePointAddr){
+  double distance = 20;
+  ScIterator5Ptr it5 = m_context.CreateIterator5(
+      routePointAddr,
+      ScType::ConstCommonArc,
+      ScType::ConstNode,
+      ScType::ConstPermPosArc,
+      MobileRobotsKeynodes::nrel_next_point);
+  if (it5->Next())
+  {
+    ScAddr const & arcAddr = it5->Get(1);
+    ScIterator3Ptr it3 = m_context.CreateIterator3(ScType::ConstNode, ScType::ConstPermPosArc, arcAddr);
+    while (it3->Next()){
+      ScAddr distanceAddr = it3->Get(0);
+      if (m_context.CheckConnector(MobileRobotsKeynodes::concept_distance, distanceAddr, ScType::ConstPermPosArc))
+      {
+        SC_LOG_INFO("dist = " + std::to_string(std::stod(m_context.GetElementSystemIdentifier(distanceAddr))));
+        distance = std::stod(m_context.GetElementSystemIdentifier(distanceAddr));
+        break;
+      }
+    }
+  }
+  return distance;
 }
 
 void MobileRobotInterpretationAgent::StopMoving(ScAddr const & robotAddr)
 {
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_is_not_moving, robotAddr);
   ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_is_moving, robotAddr);
-  //  удаление скорости
-  // SetSpeed(robotAddr, 0);
+  SetCurrentSpeed(robotAddr, 0);
 }
 
 bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint)
@@ -315,17 +382,21 @@ ScAddr MobileRobotInterpretationAgent::GetNextPoint(ScAddr const & robotAddr)
   return next_point;
 }
 
-void MobileRobotInterpretationAgent::SetSpeed(ScAddr const & robotAddr, double speedValue)
+void MobileRobotInterpretationAgent::SetCurrentSpeed(ScAddr const & robotAddr, const double & speed)
 {
-  ScIterator3Ptr it3 = m_context.CreateIterator3(ScType::ConstNodeLink, ScType::ConstActualTempPosArc, robotAddr);
+  ScIterator3Ptr it3 = m_context.CreateIterator3(robotAddr, ScType::ConstActualTempPosArc, ScType::ConstNodeLink);
   if (it3->Next())
   {
-    m_context.EraseElement(it3->Get(0));
+    ScAddr const &speedAddr = it3->Get(0);
+    m_context.SetLinkContent(speedAddr, std::to_string(speed));
   }
-
-  ScAddr speed = m_context.GenerateLink(ScType::ConstNodeLink);
-  m_context.SetLinkContent(speed, speedValue);
-  m_context.GenerateConnector(ScType::ConstActualTempPosArc, speed, robotAddr);
+  else
+  {
+    ScAddr const &speedAddr = m_context.GenerateLink(ScType::ConstNodeLink);
+    m_context.SetLinkContent(speedAddr, std::to_string(speed));
+    ScAddr arcAddr = m_context.GenerateConnector(ScType::ConstCommonArc, robotAddr, speedAddr);
+    m_context.GenerateConnector(ScType::ConstActualTempPosArc, MobileRobotsKeynodes::nrel_robot_current_speed, arcAddr);
+  }
 }
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr)

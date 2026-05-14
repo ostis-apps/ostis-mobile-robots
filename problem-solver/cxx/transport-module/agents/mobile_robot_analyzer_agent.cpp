@@ -4,7 +4,6 @@
 #include <thread>
 #include <map>
 
-// Структура для хранения статистики по роботу
 struct RobotStats
 {
   double waitingTime = 0;    // время ожидания препятствий
@@ -19,6 +18,7 @@ static std::map<size_t, std::map<size_t, std::chrono::steady_clock::time_point>>
 // Глобальные счётчики для суммарной статистики
 static double totalWaitingTime = 0;
 static double totalLoadUnloadTime = 0;
+static double totalMovingTime = 0;
 static std::chrono::steady_clock::time_point experimentStartTime;
 static bool experimentRunning = false;
 
@@ -124,7 +124,26 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateStopped(ScAction & action, Sc
   m_logger.Info("====================================");
   stateStartTimes.erase(robotHash);
   robotStats.erase(robotHash);
-  experimentRunning = false;
+
+  int other_is_launched = false;
+  ScIterator3Ptr const it3 =
+      m_context.CreateIterator3(robotAddr, ScType::ConstPermPosArc, ScType::ConstNodeTuple);
+  while (it3->Next()){
+    ScAddr robotGroupAddr = it3->Get(2);
+    ScIterator3Ptr const it3_1 = m_context.CreateIterator3(robotGroupAddr, ScType::ConstPermPosArc, ScType::ConstNode);
+    while(it3_1->Next())
+    {
+      if (m_context.CheckConnector(MobileRobotsKeynodes::concept_launched, it3_1->Get(2), ScType::ConstActualTempPosArc)){
+        other_is_launched = true;
+        break;
+      }
+    }
+    if (other_is_launched)
+      break;
+  }
+  if(!other_is_launched)
+    LogTotalStats();
+  
   return action.FinishSuccessfully();
 }
 
@@ -143,6 +162,7 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateIsNotMoving(ScAction & action
   size_t classHash = MobileRobotsKeynodes::concept_is_moving.Hash();
   double seconds = CalculateDiffInSeconds(robotHash, classHash);
   robotStats[robotHash].movingTime += seconds;
+  totalMovingTime += seconds;
   return action.FinishSuccessfully();
 }
 
@@ -208,6 +228,15 @@ double MobileRobotAnalyzerAgent::CalculateDiffInSeconds(size_t const & robotHash
   return seconds;
 }
 
-
-  
-
+void MobileRobotAnalyzerAgent::LogTotalStats()
+{
+  auto now = std::chrono::steady_clock::now();
+  double seconds = std::chrono::duration<double>(now - experimentStartTime).count();
+  SC_LOG_INFO("====================================");
+  SC_LOG_INFO("--- Total Stats ---");
+  SC_LOG_INFO("Эксперимент: " + std::to_string(seconds) + "с");
+  SC_LOG_INFO("Движение: " + std::to_string(totalMovingTime) + "с");
+  SC_LOG_INFO("Загрузка/Разгрузка: " + std::to_string(totalLoadUnloadTime) + "с");
+  SC_LOG_INFO("Ожидание: " + std::to_string(totalWaitingTime) + "с");
+  SC_LOG_INFO("====================================");
+}

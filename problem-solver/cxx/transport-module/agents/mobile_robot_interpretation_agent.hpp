@@ -35,7 +35,7 @@ public:
 
   void SetWaitingState(ScAddr const & robotAddr, bool state);
 
-  void SetSpeed(ScAddr const & robotAddr, double speed);
+  void SetCurrentSpeed(ScAddr const & robotAddr, const double &speed);
 
   ScResult InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr);
 
@@ -47,4 +47,7 @@ private:
   void ChangeActualTempArcToPos(ScAddr const & addr1, ScAddr const & addr2);
   void ChangeActualTempArcToNeg(ScAddr const & addr1, ScAddr const & addr2);
   bool IsStopped(ScAddr const & robotAddr);
+  double GetCurrentSpeed(ScAddr const & robotAddr);
+  double GetMaxSpeed(ScAddr const & robotAddr);
+  double GetDistanceToNextPoint(ScAddr const & routePointAddr);
 };
