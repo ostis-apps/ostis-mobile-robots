@@ -22,10 +22,18 @@ public:
 private:
   InterpreterCallback m_interpreterCallback;
 
+  static bool box_counted;
+  static int box_count;
+
   void ChangeActualTempArcToNeg(ScAddr const & addr1, ScAddr const & addr2);
   void ChangeActualTempArcToPos(ScAddr const & addr1, ScAddr const & addr2);
   double GetLoadTime(ScAddr const & routeAddr);
   double GetUnloadTime(ScAddr const & routeAddr);
   double GenerateTime(int const & min, int const & max);
+  bool AreThereFreeBoxes(ScAddr const &robotAddr);
+  ScAddr const &GetRouteEndPoint(ScAddr const &robotAddr);
+  void ReduceBoxCount(ScAddr const &routeStartPoint);
+
+
   std::mt19937 m_randomGenerator{std::random_device{}()};
 };

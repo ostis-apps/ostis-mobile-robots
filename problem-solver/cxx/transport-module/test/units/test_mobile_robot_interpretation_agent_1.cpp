@@ -12,7 +12,7 @@ TEST_F(TransportModuleTest, CallMobileRobotInterpretationAgent1)
 
     loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "interpretation_agent_test_1_initial_states.scs");
 
-    sleep(10);
+    sleep(6);
 
     DeleteObstacle(context);
 
