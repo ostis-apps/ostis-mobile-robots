@@ -29,7 +29,6 @@ nrel_obstacle_position
 25 <- concept_distance;;
 30 <- concept_distance;;
 
-
 // роботы
 robot1
 <- concept_mobile_robot;;
@@ -50,6 +49,5 @@ nrel_location ~> (..box2 => ..pointA);;
 nrel_obstacle_position ~> (..obstacle => ..point3);;
 
 @route_example_1 => nrel_work_robot_group: {
-   robot1;
-   robot2
+   robot1
 };;

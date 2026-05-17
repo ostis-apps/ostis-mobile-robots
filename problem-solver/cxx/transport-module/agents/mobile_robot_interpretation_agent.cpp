@@ -46,7 +46,7 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & act
 {
   if (IsStopped(robotAddr))
     return action.FinishSuccessfully();
-  SC_LOG_INFO("InterpreterStateLaunched");
+  SC_LOG_INFO("Start InterpreterStateLaunched (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNode,
       ScType::ConstCommonArc,
@@ -59,12 +59,12 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateLaunched(ScAction & act
     ScIterator3Ptr it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ConstPermPosArc, boxAddr);
     if (it3->Next())
     {
-      SC_LOG_INFO("INITIALLY THERE IS ONE BOX ON ROBOT");
+      SC_LOG_INFO("Initially there is a box on " + m_context.GetElementSystemIdentifier(robotAddr));
       ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_loaded, robotAddr);
       return action.FinishSuccessfully();
     }
   }
-  SC_LOG_INFO("INITIALLY THERE IS NO BOX ON ROBOT");
+  SC_LOG_INFO("Initially there is no box on " + m_context.GetElementSystemIdentifier(robotAddr));
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
   return action.FinishSuccessfully();
 }
@@ -74,22 +74,22 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & ac
   if (IsStopped(robotAddr))
     return action.FinishSuccessfully();
 
-  SC_LOG_INFO("InterpreterStateBoxLoaded");
+  SC_LOG_INFO("Start InterpreterStateBoxLoaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
 
   StartMoving(robotAddr);
 
   // перемещение в следующую точку маршрута
   ScAddr next_point = GetNextPoint(robotAddr);
-  while (!UnloadingPointCheck(next_point))
+  while (!UnloadingPointCheck(next_point, robotAddr))
   {
-    if (ObstacleCheck(next_point))
+    if (ObstacleCheck(next_point, robotAddr))
     {
       StopMoving(robotAddr);
 
       //  добавление состояния "ожидание"
       SetWaitingState(robotAddr, true);
 
-      while (ObstacleCheck(next_point))
+      while (ObstacleCheck(next_point, robotAddr))
       {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         continue;
@@ -110,6 +110,9 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxLoaded(ScAction & ac
   //  добавление состояния "готов к разгрузке"
   ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_ready_being_unloaded, robotAddr);
 
+  SC_LOG_INFO("Finish InterpreterStateBoxLoaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
+
+
   return action.FinishSuccessfully();
 }
 
@@ -118,21 +121,21 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
   if (IsStopped(robotAddr))
     return action.FinishSuccessfully();
 
-  SC_LOG_INFO("InterpreterStateBoxUnloaded");
+  SC_LOG_INFO("Start InterpreterStateBoxUnloaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
 
   StartMoving(robotAddr);
 
   // перемещение в следующую точку маршрута
   ScAddr next_point = GetNextPoint(robotAddr);
-  while (!UploadingPointCheck(next_point))
+  while (!UploadingPointCheck(next_point, robotAddr))
   {
-    if (ObstacleCheck(next_point))
+    if (ObstacleCheck(next_point, robotAddr))
     {
       StopMoving(robotAddr);
 
       SetWaitingState(robotAddr, true);
 
-      while (ObstacleCheck(next_point))
+      while (ObstacleCheck(next_point, robotAddr))
       {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         continue;
@@ -161,6 +164,9 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
   m_context.GenerateConnector(
       ScType::ConstActualTempPosArc, MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
 
+  SC_LOG_INFO("Start InterpreterStateBoxUnloaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
+
+
   return action.FinishSuccessfully();
 }
 
@@ -178,7 +184,7 @@ void MobileRobotInterpretationAgent::SetWaitingState(ScAddr const & robotAddr, b
   }
 }
 
-bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & routePoint)
+bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & routePoint, ScAddr const & robotAddr)
 {
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNodeStructure,
@@ -188,17 +194,17 @@ bool MobileRobotInterpretationAgent::UnloadingPointCheck(ScAddr const & routePoi
       MobileRobotsKeynodes::rrel_end_point);
   if (it5->Next())
   {
-    SC_LOG_INFO("EndPoint");
+    SC_LOG_INFO("The next point is EndPoint (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
     return true;
   }
   else
   {
-    SC_LOG_INFO("not EndPoint");
+    SC_LOG_INFO("The next point is not EndPoint (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
     return false;
   }
 }
 
-bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & routePoint)
+bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & routePoint, ScAddr const & robotAddr)
 {
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNodeStructure,
@@ -208,19 +214,19 @@ bool MobileRobotInterpretationAgent::UploadingPointCheck(ScAddr const & routePoi
       MobileRobotsKeynodes::rrel_start_point);
   if (it5->Next())
   {
-    SC_LOG_INFO("StartPoint");
+    SC_LOG_INFO("The next point is StartPoint (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
     return true;
   }
   else
   {
-    SC_LOG_INFO("not StartPoint");
+    SC_LOG_INFO("The next point is not StartPoint (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
     return false;
   }
 }
 
 void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, ScAddr const & next_point)
 {
-  SC_LOG_INFO("Move to next point " + m_context.GetElementSystemIdentifier(robotAddr));
+  SC_LOG_INFO("Move to next point (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
   ScAddr currentRoutePointAddr;
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       robotAddr,
@@ -236,20 +242,8 @@ void MobileRobotInterpretationAgent::MoveToNextPoint(ScAddr const & robotAddr, S
   ScAddr const & arc = m_context.GenerateConnector(ScType::ConstCommonArc, robotAddr, next_point);
   m_context.GenerateConnector(ScType::ConstActualTempPosArc, MobileRobotsKeynodes::nrel_location, arc);
 
-  // задержка для иммитации скорости
-  // ScIterator3Ptr it3 = m_context.CreateIterator3(
-  //   ScType::ConstNodeLink,
-  //   ScType::ConstActualTempPosArc,
-  //   robotAddr);
-  // if (it3->Next()){
-  //   ScAddr speedNode = it3->Get(0);
-  //   double speed = speedNode.GetLinkContent();
-  // }
-
   double speed = GetCurrentSpeed(robotAddr);
-  SC_LOG_INFO("Скорость " + std::to_string(speed));
   double distance = GetDistanceToNextPoint(currentRoutePointAddr);
-  SC_LOG_INFO(std::to_string(distance));
   double time = distance / speed;
   std::this_thread::sleep_for(std::chrono::duration<double>(time));
 }
@@ -293,7 +287,6 @@ double MobileRobotInterpretationAgent::GetCurrentSpeed(ScAddr const & robotAddr)
   if (it5->Next())
   {
     ScAddr const &speedAddr = it5->Get(2);
-    SC_LOG_INFO(m_context.GetElementSystemIdentifier(speedAddr));
     m_context.GetLinkContent(speedAddr, speed);
   }
   return speed;
@@ -315,7 +308,6 @@ double MobileRobotInterpretationAgent::GetDistanceToNextPoint(ScAddr const & rou
       ScAddr distanceAddr = it3->Get(0);
       if (m_context.CheckConnector(MobileRobotsKeynodes::concept_distance, distanceAddr, ScType::ConstPermPosArc))
       {
-        SC_LOG_INFO("dist = " + std::to_string(std::stod(m_context.GetElementSystemIdentifier(distanceAddr))));
         distance = std::stod(m_context.GetElementSystemIdentifier(distanceAddr));
         break;
       }
@@ -331,7 +323,7 @@ void MobileRobotInterpretationAgent::StopMoving(ScAddr const & robotAddr)
   SetCurrentSpeed(robotAddr, 0);
 }
 
-bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint)
+bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint, ScAddr const & robotAddr)
 {
   ScIterator5Ptr it5 = m_context.CreateIterator5(
       ScType::ConstNode,
@@ -346,7 +338,7 @@ bool MobileRobotInterpretationAgent::ObstacleCheck(ScAddr const & routePoint)
         m_context.CreateIterator3(MobileRobotsKeynodes::concept_obstacle, ScType::ConstPermPosArc, obstacleAddr);
     if (it3->Next())
     {
-      SC_LOG_INFO("Obstacle");
+      SC_LOG_INFO("the is an obstacle at the next point (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
       return true;
     }
   }
@@ -401,7 +393,7 @@ void MobileRobotInterpretationAgent::SetCurrentSpeed(ScAddr const & robotAddr, c
 
 ScResult MobileRobotInterpretationAgent::InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr)
 {
-  SC_LOG_INFO("InterpreterStateStopped " + m_context.GetElementSystemIdentifier(robotAddr));
+  SC_LOG_INFO("InterpreterStateStopped (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
   return action.FinishSuccessfully();
 }
 

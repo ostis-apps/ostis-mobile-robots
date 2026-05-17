@@ -17,3 +17,4 @@ void SubscribeInterCoordAgents(ScAgentContext & context);
 void UnsubscribeInterCoordAgents(ScAgentContext & context);
 void WaitAgents(ScAgentContext & context);
 void DeleteObstacle(ScAgentContext & context);
+void CountBoxes(ScAgentContext & context);
