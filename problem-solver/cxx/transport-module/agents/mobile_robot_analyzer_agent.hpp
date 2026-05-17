@@ -20,11 +20,10 @@ public:
   ScResult InterpreterStateIsNotLoading(ScAction & action, ScAddr const & robotAddr);
   ScResult InterpreterStateIsUnloading(ScAction & action, ScAddr const & robotAddr);
   ScResult InterpreterStateIsNotUnloading(ScAction & action, ScAddr const & robotAddr);
-
+  void LogTotalStats();
   ScResult DoProgram(ScEventChangeMobileRobotState const & event, ScAction & action) override;
 
 private:
   InterpreterCallback m_interpreterCallback;
   double CalculateDiffInSeconds(size_t const & robotHash, size_t const & classHash);
-  void LogTotalStats();
 };

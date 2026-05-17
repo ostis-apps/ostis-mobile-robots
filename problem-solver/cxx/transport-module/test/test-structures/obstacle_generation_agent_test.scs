@@ -1,0 +1,17 @@
+concept_obstacle
+<- sc_node_class;;
+
+nrel_obstacle_position
+<- sc_node_non_role_relation;;
+
+@obstacle_generator_test_route = [*
+    obstacle_generator_test_point_1 => nrel_next_point: obstacle_generator_test_point_2;;
+    obstacle_generator_test_point_2 => nrel_next_point: obstacle_generator_test_point_3;;
+*];;
+@obstacle_generator_test_route <- concept_route;;
+
+obstacle_generator_test_robot
+<- concept_mobile_robot;;
+obstacle_generator_test_robot
+<~ concept_launched;;
+nrel_location ~> (obstacle_generator_test_robot => obstacle_generator_test_point_1);;

@@ -1,61 +1,34 @@
-// маршрут
-@route_example_1 = [*
-    -> rrel_start_point: ..pointA;;
-    -> rrel_end_point: ..pointB;;
+// Короткий кольцевой маршрут
+@route_beta = [*
+    -> rrel_start_point: ..loc1;;
+    -> rrel_end_point: ..loc3;;
 
-    ..pointA => nrel_next_point: ..point1;;
-    ..point1 => nrel_next_point: ..point2;;
-    ..point2 => nrel_next_point: ..point3;;
-    ..point3 => nrel_next_point: ..point4;;
-    ..point4 => nrel_next_point: ..pointB;;
-    ..pointB => nrel_next_point: ..point5;;
-    ..point5 => nrel_next_point: ..point6;;
-    ..point6 => nrel_next_point: ..point7;;
-    ..point7 => nrel_next_point: ..pointA;;
-    ..storage => nrel_next_point: ..pointA;;
+    ..loc1 => nrel_next_point: ..loc2;;
+    ..loc2 => nrel_next_point: ..loc3;;
+    ..loc3 => nrel_next_point: ..loc1;;
+    ..base => nrel_next_point: ..loc1;;
 *];;
-@route_example_1 <- concept_route;;
-@route_example_1 => nrel_min_load_time: [0];;
-@route_example_1 => nrel_max_load_time: [5];;
-@route_example_1 => nrel_min_unload_time: [0];;
-@route_example_1 => nrel_max_unload_time: [5];;
 
-// коробки
-..box1
-<- concept_box;;
-nrel_location ~> (..box1 => ..pointA);;
+@route_beta <- concept_route;;
+@route_beta => nrel_min_load_time: [2];;
+@route_beta => nrel_max_load_time: [4];;
+@route_beta => nrel_min_unload_time: [1];;
+@route_beta => nrel_max_unload_time: [3];;
 
-..box2
-<- concept_box;;
-nrel_location ~> (..box2 => ..pointA);;
+// Три коробки в первой точке
+..pkgA <- concept_box;; 
+nrel_location ~> (..pkgA => ..loc1);;
 
-..box3
-<- concept_box;;
-nrel_location ~> (..box3 => ..pointA);;
+..pkgB <- concept_box;; 
+nrel_location ~> (..pkgB => ..loc1);;
 
-..box4
-<- concept_box;;
-nrel_location ~> (..box4 => ..pointA);;
+..pkgC <- concept_box;; 
+nrel_location ~> (..pkgC => ..loc1);;
 
-..box5
-<- concept_box;;
-nrel_location ~> (..box5 => ..pointA);;
-
-..box6
-<- concept_box;;
-nrel_location ~> (..box6 => ..pointA);;
-
-..box7
-<- concept_box;;
-nrel_location ~> (..box7 => ..pointA);;
-
-// роботы
-robot1
+// Робот "
+robot_alpha
 <- concept_mobile_robot;;
-nrel_location ~> (robot1 => ..storage);;
 
-robot2
-<- concept_mobile_robot;;
-nrel_location ~> (robot2 => ..storage);;
+nrel_location ~> (robot_alpha => ..base);;
 
-
+robot_alpha => nrel_current_route: @route_beta;;

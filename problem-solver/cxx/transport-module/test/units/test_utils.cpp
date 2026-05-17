@@ -81,7 +81,7 @@ void WaitAgents(ScAgentContext & context)
 void DeleteObstacle(ScAgentContext & context){
   ScIterator3Ptr const it3 =
       context.CreateIterator3(MobileRobotsKeynodes::concept_obstacle, ScType::ConstPermPosArc, ScType::ConstNode);
-  if (it3->Next())
+  while (it3->Next())
   {
     ScAddr obstacle = it3->Get(2);
     context.EraseElement(obstacle);
