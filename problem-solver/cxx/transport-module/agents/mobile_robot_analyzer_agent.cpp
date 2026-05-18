@@ -20,7 +20,6 @@ static double totalWaitingTime = 0;
 static double totalLoadUnloadTime = 0;
 static double totalMovingTime = 0;
 static std::chrono::steady_clock::time_point experimentStartTime;
-static bool experimentRunning = false;
 
 ScAddr MobileRobotAnalyzerAgent::GetActionClass() const
 {
@@ -101,7 +100,6 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateLaunched(ScAction & action, S
 {
   size_t robotHash = robotAddr.Hash();
   auto now = std::chrono::steady_clock::now();
-  experimentRunning = true;
   experimentStartTime = now;
   totalWaitingTime = 0;
   totalLoadUnloadTime = 0;
@@ -112,20 +110,20 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateLaunched(ScAction & action, S
 ScResult MobileRobotAnalyzerAgent::InterpreterStateStopped(ScAction & action, ScAddr const & robotAddr)
 {
   size_t robotHash = robotAddr.Hash();
-  experimentRunning = false;
+
   std::this_thread::sleep_for(std::chrono::seconds(1));
   RobotStats stats = robotStats[robotHash];
-  m_logger.Info("====================================");
-  m_logger.Info("--- Робот " + m_context.GetElementSystemIdentifier(robotAddr) + " ---");
-  m_logger.Info("  Ожидание: " + std::to_string(stats.waitingTime) + "с");
-  m_logger.Info("  Движение: " + std::to_string(stats.movingTime) + "с");
-  m_logger.Info("  Загрузка: " + std::to_string(stats.loadingTime) + "с");
-  m_logger.Info("  Разгрузка: " + std::to_string(stats.unloadingTime) + "с");
-  m_logger.Info("====================================");
+  SC_LOG_INFO("====================================");
+  SC_LOG_INFO("--- " + m_context.GetElementSystemIdentifier(robotAddr) + " ---");
+  SC_LOG_INFO("Waiting: " + std::to_string(stats.waitingTime) + "с");
+  SC_LOG_INFO("Moving: " + std::to_string(stats.movingTime) + "с");
+  SC_LOG_INFO("Loading: " + std::to_string(stats.loadingTime) + "с");
+  SC_LOG_INFO("Unloading: " + std::to_string(stats.unloadingTime) + "с");
+  SC_LOG_INFO("====================================");
   stateStartTimes.erase(robotHash);
   robotStats.erase(robotHash);
 
-  int other_is_launched = false;
+  bool other_is_launched = false;
   ScIterator3Ptr const it3 =
       m_context.CreateIterator3(robotAddr, ScType::ConstPermPosArc, ScType::ConstNodeTuple);
   while (it3->Next()){
@@ -181,6 +179,7 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateIsNotWaiting(ScAction & actio
   size_t classHash = MobileRobotsKeynodes::concept_robot_is_waiting.Hash();
   double seconds = CalculateDiffInSeconds(robotHash, classHash);
   robotStats[robotHash].waitingTime += seconds;
+  totalWaitingTime += seconds;
   return action.FinishSuccessfully();
 }
 
@@ -199,6 +198,7 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateIsNotLoading(ScAction & actio
   size_t classHash = MobileRobotsKeynodes::concept_robot_is_loading.Hash();
   double seconds = CalculateDiffInSeconds(robotHash, classHash);
   robotStats[robotHash].loadingTime += seconds;
+  totalLoadUnloadTime += seconds;
   return action.FinishSuccessfully();
 }
 
@@ -217,6 +217,7 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateIsNotUnloading(ScAction & act
   size_t classHash = MobileRobotsKeynodes::concept_robot_is_unloading.Hash();
   double seconds = CalculateDiffInSeconds(robotHash, classHash);
   robotStats[robotHash].unloadingTime += seconds;
+  totalLoadUnloadTime += seconds;
   return action.FinishSuccessfully();
 }
 
@@ -234,9 +235,9 @@ void MobileRobotAnalyzerAgent::LogTotalStats()
   double seconds = std::chrono::duration<double>(now - experimentStartTime).count();
   SC_LOG_INFO("====================================");
   SC_LOG_INFO("--- Total Stats ---");
-  SC_LOG_INFO("Эксперимент: " + std::to_string(seconds) + "с");
-  SC_LOG_INFO("Движение: " + std::to_string(totalMovingTime) + "с");
-  SC_LOG_INFO("Загрузка/Разгрузка: " + std::to_string(totalLoadUnloadTime) + "с");
-  SC_LOG_INFO("Ожидание: " + std::to_string(totalWaitingTime) + "с");
+  SC_LOG_INFO("Experiment: " + std::to_string(seconds) + "с");
+  SC_LOG_INFO("Moving: " + std::to_string(totalMovingTime) + "с");
+  SC_LOG_INFO("Loading/Unloading: " + std::to_string(totalLoadUnloadTime) + "с");
+  SC_LOG_INFO("Waiting: " + std::to_string(totalWaitingTime) + "с");
   SC_LOG_INFO("====================================");
 }

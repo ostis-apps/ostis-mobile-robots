@@ -19,7 +19,7 @@ TEST_F(TransportModuleTest, CallMobileRobotInterpretationAgent1)
     RandomObstacleGenerationAgent obstacleGenerator;
     obstacleGenerator.GenerateObstacle(context);
 
-    sleep(10);
+    sleep(6);
 
     DeleteObstacle(context);
 

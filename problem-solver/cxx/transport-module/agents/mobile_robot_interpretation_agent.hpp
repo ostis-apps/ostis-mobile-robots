@@ -25,13 +25,13 @@ public:
 
   void StopMoving(ScAddr const & robotAddr);
 
-  bool ObstacleCheck(ScAddr const & next_point);
+  bool ObstacleCheck(ScAddr const & routePoint, ScAddr const & robotAddr);
 
   ScAddr GetNextPoint(ScAddr const & robotAddr);
 
-  bool UnloadingPointCheck(ScAddr const & next_point);
+  bool UnloadingPointCheck(ScAddr const & routePoint, ScAddr const & robotAddr);
 
-  bool UploadingPointCheck(ScAddr const & next_point);
+  bool UploadingPointCheck(ScAddr const & routePoint, ScAddr const & robotAddr);
 
   void SetWaitingState(ScAddr const & robotAddr, bool state);
 

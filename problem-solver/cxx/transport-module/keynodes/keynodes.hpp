@@ -69,6 +69,9 @@ public:
   static inline ScKeynode const nrel_min_unload_time{"nrel_min_unload_time", ScType::ConstNodeNonRole};
   static inline ScKeynode const nrel_max_unload_time{"nrel_max_unload_time", ScType::ConstNodeNonRole};
 
+  static inline ScKeynode const nrel_box_count{"nrel_box_count", ScType::ConstNodeNonRole};
+  static inline ScKeynode const nrel_free_box_count{"nrel_free_box_count", ScType::ConstNodeNonRole};
+
   static inline ScKeynode const concept_route{"concept_route", ScType::ConstNodeStructure};
   static inline ScKeynode const nrel_next_point{"nrel_next_point", ScType::ConstNodeNonRole};
   
