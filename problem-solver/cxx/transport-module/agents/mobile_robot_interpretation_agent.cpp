@@ -164,7 +164,7 @@ ScResult MobileRobotInterpretationAgent::InterpreterStateBoxUnloaded(ScAction & 
   m_context.GenerateConnector(
       ScType::ConstActualTempPosArc, MobileRobotsKeynodes::concept_ready_being_loaded, robotAddr);
 
-  SC_LOG_INFO("Start InterpreterStateBoxUnloaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
+  SC_LOG_INFO("Finish InterpreterStateBoxUnloaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
 
 
   return action.FinishSuccessfully();

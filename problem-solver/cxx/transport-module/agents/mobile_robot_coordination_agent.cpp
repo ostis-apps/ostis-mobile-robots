@@ -163,7 +163,7 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScActi
     ScIterator3Ptr it3 = m_context.CreateIterator3(MobileRobotsKeynodes::concept_box, ScType::ConstPermPosArc, boxAddr);
     if (it3->Next())
     {
-      SC_LOG_INFO("A box is found on (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
+      SC_LOG_INFO("A box is found on " + m_context.GetElementSystemIdentifier(robotAddr));
 
       ScIterator5Ptr it5_2 = m_context.CreateIterator5(
           ScType::ConstNodeStructure,
@@ -190,11 +190,14 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScActi
 
         if (!keep_working)
         {
+          SC_LOG_INFO("There are no boxes at StartPoint, " + m_context.GetElementSystemIdentifier(robotAddr) + " is shutting down");
           ChangeActualTempArcToNeg(MobileRobotsKeynodes::concept_launched, robotAddr);
           ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_stopped, robotAddr);
+          SC_LOG_INFO("Finish InterpreterStateReadyBeingUnloaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
           return action.FinishSuccessfully();
         }
         
+        SC_LOG_INFO("There is at least one free box at StartPoint, " + m_context.GetElementSystemIdentifier(robotAddr) + " keeps working");
         ChangeActualTempArcToPos(MobileRobotsKeynodes::concept_box_unloaded, robotAddr);
 
         SC_LOG_INFO("Finish InterpreterStateReadyBeingUnloaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
@@ -202,7 +205,6 @@ ScResult MobileRobotCoordinationAgent::InterpreterStateReadyBeingUnloaded(ScActi
       }
     }
   }
-
   SC_LOG_INFO("Finish unsuccessfully InterpreterStateReadyBeingUnloaded (" + m_context.GetElementSystemIdentifier(robotAddr) + ")");
   return action.FinishUnsuccessfully();
 }

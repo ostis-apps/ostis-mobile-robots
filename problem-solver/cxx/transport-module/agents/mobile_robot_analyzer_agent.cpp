@@ -115,10 +115,10 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateStopped(ScAction & action, Sc
   RobotStats stats = robotStats[robotHash];
   SC_LOG_INFO("====================================");
   SC_LOG_INFO("--- " + m_context.GetElementSystemIdentifier(robotAddr) + " ---");
-  SC_LOG_INFO("Ожидание: " + std::to_string(stats.waitingTime) + "с");
-  SC_LOG_INFO("Движение: " + std::to_string(stats.movingTime) + "с");
-  SC_LOG_INFO("Загрузка: " + std::to_string(stats.loadingTime) + "с");
-  SC_LOG_INFO("Разгрузка: " + std::to_string(stats.unloadingTime) + "с");
+  SC_LOG_INFO("Waiting: " + std::to_string(stats.waitingTime) + "с");
+  SC_LOG_INFO("Moving: " + std::to_string(stats.movingTime) + "с");
+  SC_LOG_INFO("Loading: " + std::to_string(stats.loadingTime) + "с");
+  SC_LOG_INFO("Unloading: " + std::to_string(stats.unloadingTime) + "с");
   SC_LOG_INFO("====================================");
   stateStartTimes.erase(robotHash);
   robotStats.erase(robotHash);
@@ -235,9 +235,9 @@ void MobileRobotAnalyzerAgent::LogTotalStats()
   double seconds = std::chrono::duration<double>(now - experimentStartTime).count();
   SC_LOG_INFO("====================================");
   SC_LOG_INFO("--- Total Stats ---");
-  SC_LOG_INFO("Эксперимент: " + std::to_string(seconds) + "с");
-  SC_LOG_INFO("Движение: " + std::to_string(totalMovingTime) + "с");
-  SC_LOG_INFO("Загрузка/Разгрузка: " + std::to_string(totalLoadUnloadTime) + "с");
-  SC_LOG_INFO("Ожидание: " + std::to_string(totalWaitingTime) + "с");
+  SC_LOG_INFO("Experiment: " + std::to_string(seconds) + "с");
+  SC_LOG_INFO("Moving: " + std::to_string(totalMovingTime) + "с");
+  SC_LOG_INFO("Loading/Unloading: " + std::to_string(totalLoadUnloadTime) + "с");
+  SC_LOG_INFO("Waiting: " + std::to_string(totalWaitingTime) + "с");
   SC_LOG_INFO("====================================");
 }
