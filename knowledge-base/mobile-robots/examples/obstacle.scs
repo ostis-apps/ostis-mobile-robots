@@ -2,4 +2,4 @@ concept_obstacle
 <- sc_node_class;;
 
 nrel_obstacle_position
-<- sc_node_norole_relation;;
+<- sc_node_non_role_relation;;
