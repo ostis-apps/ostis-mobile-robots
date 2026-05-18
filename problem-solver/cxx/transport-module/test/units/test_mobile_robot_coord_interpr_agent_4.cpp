@@ -4,17 +4,17 @@
 #include <agents/random_obstacle_generation_agent.hpp>
 #undef private
 
-TEST_F(TransportModuleTest, CallMobileRobotInterpretationAgent1)
+TEST_F(TransportModuleTest, CallMobileRobotCoordInterprAgent4)
 {
   try
   {
     ScAgentContext context;
     ScsLoader loader;
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "interpretation_agent_test_1.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coord_interpr_agent_test_4.scs");
 
-    SubscribeAgents(context);
+    SubscribeInterCoordAgents(context);
 
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "interpretation_agent_test_1_initial_states.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coord_interpr_agent_test_4_initial_states.scs");
 
     RandomObstacleGenerationAgent obstacleGenerator;
     obstacleGenerator.GenerateObstacle(context);

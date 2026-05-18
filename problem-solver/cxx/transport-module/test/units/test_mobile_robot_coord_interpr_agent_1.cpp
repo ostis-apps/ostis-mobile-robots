@@ -1,16 +1,16 @@
 #include "test_utils.hpp"
 
-TEST_F(TransportModuleTest, CallMobileRobotCoordinationAgent1)
+TEST_F(TransportModuleTest, CallMobileRobotCoordInterprAgent1)
 {
   try
   {
     ScAgentContext context;
     ScsLoader loader;
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coordination_agent_test_1.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coord_interpr_agent_test_1.scs");
 
     SubscribeInterCoordAgents(context);
 
-    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coordination_agent_test_1_initial_states.scs");
+    loader.loadScsFile(context, EXAMPLE_MODULE_TEST_FILES_DIR_PATH + "coord_interpr_agent_test_1_initial_states.scs");
 
     WaitAgents(context);
 

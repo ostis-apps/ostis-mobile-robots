@@ -1,9 +1,3 @@
-concept_obstacle
-<- sc_node_class;;
-
-nrel_obstacle_position
-<- sc_node_norole_relation;;
-
 // маршрут
 @route_example_1 = [*
     -> rrel_start_point: ..pointA;;
@@ -33,7 +27,22 @@ nrel_obstacle_position
 robot1
 <- concept_mobile_robot;;
 nrel_location ~> (robot1 => ..storage);;
-robot1 => nrel_robot_max_speed: [50];;
+robot1 => nrel_robot_max_speed: [75];;
+
+robot2
+<- concept_mobile_robot;;
+nrel_location ~> (robot2 => ..storage);;
+robot2 => nrel_robot_max_speed: [60];;
+
+robot3
+<- concept_mobile_robot;;
+nrel_location ~> (robot3 => ..storage);;
+robot3 => nrel_robot_max_speed: [50];;
+
+robot4
+<- concept_mobile_robot;;
+nrel_location ~> (robot4 => ..storage);;
+robot4 => nrel_robot_max_speed: [30];;
 
 // коробки
 ..box1
@@ -49,5 +58,8 @@ nrel_location ~> (..box2 => ..pointA);;
 nrel_obstacle_position ~> (..obstacle => ..point3);;
 
 @route_example_1 => nrel_work_robot_group: {
-   robot1
+   robot1;
+   robot2;
+   robot3;
+   robot4
 };;

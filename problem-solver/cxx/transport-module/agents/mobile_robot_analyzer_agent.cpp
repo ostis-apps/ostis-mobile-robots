@@ -145,6 +145,19 @@ ScResult MobileRobotAnalyzerAgent::InterpreterStateStopped(ScAction & action, Sc
   return action.FinishSuccessfully();
 }
 
+void MobileRobotAnalyzerAgent::LogTotalStats()
+{
+  auto now = std::chrono::steady_clock::now();
+  double seconds = std::chrono::duration<double>(now - experimentStartTime).count();
+  SC_LOG_INFO("====================================");
+  SC_LOG_INFO("--- Total Stats ---");
+  SC_LOG_INFO("Experiment: " + std::to_string(seconds) + "с");
+  SC_LOG_INFO("Moving: " + std::to_string(totalMovingTime) + "с");
+  SC_LOG_INFO("Loading/Unloading: " + std::to_string(totalLoadUnloadTime) + "с");
+  SC_LOG_INFO("Waiting: " + std::to_string(totalWaitingTime) + "с");
+  SC_LOG_INFO("====================================");
+}
+
 ScResult MobileRobotAnalyzerAgent::InterpreterStateIsMoving(ScAction & action, ScAddr const & robotAddr)
 {
   size_t robotHash = robotAddr.Hash();
@@ -227,17 +240,4 @@ double MobileRobotAnalyzerAgent::CalculateDiffInSeconds(size_t const & robotHash
   auto startTime = stateStartTimes[robotHash][classHash];
   double seconds = std::chrono::duration<double>(now - startTime).count();
   return seconds;
-}
-
-void MobileRobotAnalyzerAgent::LogTotalStats()
-{
-  auto now = std::chrono::steady_clock::now();
-  double seconds = std::chrono::duration<double>(now - experimentStartTime).count();
-  SC_LOG_INFO("====================================");
-  SC_LOG_INFO("--- Total Stats ---");
-  SC_LOG_INFO("Experiment: " + std::to_string(seconds) + "с");
-  SC_LOG_INFO("Moving: " + std::to_string(totalMovingTime) + "с");
-  SC_LOG_INFO("Loading/Unloading: " + std::to_string(totalLoadUnloadTime) + "с");
-  SC_LOG_INFO("Waiting: " + std::to_string(totalWaitingTime) + "с");
-  SC_LOG_INFO("====================================");
 }
