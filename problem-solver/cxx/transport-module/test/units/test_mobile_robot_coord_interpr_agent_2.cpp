@@ -14,7 +14,7 @@ TEST_F(TransportModuleTest, CallMobileRobotCoordInterprAgent2)
 
     WaitAgents(context);
 
-    UnsubscribeAgents(context);
+    UnsubscribeInterCoordAgents(context);
   }
   catch (utils::ScException & e)
   {

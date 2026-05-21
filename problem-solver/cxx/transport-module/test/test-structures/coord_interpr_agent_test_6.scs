@@ -1,0 +1,53 @@
+@route_example = [*
+    -> rrel_start_point: ..pointA;;
+    -> rrel_end_point: ..pointB;;
+
+    ..pointA => nrel_next_point: 25: ..point1;;
+    ..point1 => nrel_next_point: 25: ..point2;;
+    ..point2 => nrel_next_point: 25: ..pointB;;
+    ..pointB => nrel_next_point: 25: ..point3;;
+    ..point3 => nrel_next_point: 30: ..point4;;
+    ..point4 => nrel_next_point: 20: ..pointA;;
+    ..storage => nrel_next_point: 20: ..pointA;;
+*];;
+@route_example <- concept_route;;
+@route_example => nrel_min_load_time: [0];;
+@route_example => nrel_max_load_time: [2];;
+@route_example => nrel_min_unload_time: [0];;
+@route_example => nrel_max_unload_time: [2];;
+20 <- concept_distance;;
+25 <- concept_distance;;
+30 <- concept_distance;;
+
+// роботы
+robot1
+<- concept_mobile_robot;;
+nrel_location ~> (robot1 => ..storage);;
+robot1 => nrel_robot_max_speed: [50];;
+
+robot2
+<- concept_mobile_robot;;
+nrel_location ~> (robot2 => ..storage);;
+robot2 => nrel_robot_max_speed: [60];;
+
+// коробки
+..box1
+<- concept_box;;
+nrel_location ~> (..box1 => ..pointA);;
+
+..box2
+<- concept_box;;
+nrel_location ~> (..box2 => ..pointA);;
+
+..box3
+<- concept_box;;
+nrel_location ~> (..box3 => ..pointA);;
+
+..obstacle
+<- concept_obstacle;;
+nrel_obstacle_position ~> (..obstacle => ..point3);;
+
+@route_example => nrel_work_robot_group: {
+   robot1;
+   robot2
+};;
